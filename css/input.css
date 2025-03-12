@@ -1,0 +1,26 @@
+/* Inter font by Google */
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+@import "tailwindcss";
+
+@theme {
+    --font-inter: "Inter", "sans-serif";
+    --color-ured: #f95738;
+    --color-uorange: #ee964b;
+    --color-uyellow: #f4d35e;
+    --color-ublue: #0d3b66;
+    --color-usky: #b4daff;
+
+    --animate-open: open 0.4s;
+
+}
+
+@keyframes open {
+    0% {
+        opacity: 0;
+        max-height: 0px;
+    }
+    100% {
+        opacity: 1;
+        max-height: 300px;
+    }
+}

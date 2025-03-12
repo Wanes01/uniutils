@@ -1,0 +1,4 @@
+.env
+db/creation.sql
+assets/prod/**
+tailwindcss.exe
