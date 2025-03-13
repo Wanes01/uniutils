@@ -221,9 +221,6 @@
   .mt-3 {
     margin-top: calc(var(--spacing) * 3);
   }
-  .mt-5 {
-    margin-top: calc(var(--spacing) * 5);
-  }
   .mt-6 {
     margin-top: calc(var(--spacing) * 6);
   }
@@ -481,13 +478,6 @@
   .shadow-gray-500 {
     --tw-shadow-color: var(--color-gray-500);
   }
-  .hover\:bg-usky {
-    &:hover {
-      @media (hover: hover) {
-        background-color: var(--color-usky);
-      }
-    }
-  }
   .focus\:bg-sky-50 {
     &:focus {
       background-color: var(--color-sky-50);
@@ -513,6 +503,11 @@
   .active\:inset-shadow-gray-800 {
     &:active {
       --tw-inset-shadow-color: var(--color-gray-800);
+    }
+  }
+  .md\:col-span-2 {
+    @media (width >= 48rem) {
+      grid-column: span 2 / span 2;
     }
   }
   .md\:mx-2 {
@@ -550,6 +545,11 @@
       display: flex;
     }
   }
+  .md\:grid {
+    @media (width >= 48rem) {
+      display: grid;
+    }
+  }
   .md\:hidden {
     @media (width >= 48rem) {
       display: none;
@@ -585,11 +585,6 @@
       width: calc(2/3 * 100%);
     }
   }
-  .md\:w-40 {
-    @media (width >= 48rem) {
-      width: calc(var(--spacing) * 40);
-    }
-  }
   .md\:w-auto {
     @media (width >= 48rem) {
       width: auto;
@@ -598,6 +593,11 @@
   .md\:flex-1 {
     @media (width >= 48rem) {
       flex: 1;
+    }
+  }
+  .md\:grid-cols-2 {
+    @media (width >= 48rem) {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
   .md\:flex-col {
@@ -623,6 +623,11 @@
   .md\:gap-3 {
     @media (width >= 48rem) {
       gap: calc(var(--spacing) * 3);
+    }
+  }
+  .md\:gap-x-4 {
+    @media (width >= 48rem) {
+      column-gap: calc(var(--spacing) * 4);
     }
   }
   .md\:border-0 {
@@ -662,6 +667,11 @@
       padding-inline: calc(var(--spacing) * 2);
     }
   }
+  .md\:px-5 {
+    @media (width >= 48rem) {
+      padding-inline: calc(var(--spacing) * 5);
+    }
+  }
   .md\:px-10 {
     @media (width >= 48rem) {
       padding-inline: calc(var(--spacing) * 10);
@@ -670,6 +680,20 @@
   .md\:py-1 {
     @media (width >= 48rem) {
       padding-block: calc(var(--spacing) * 1);
+    }
+  }
+  .md\:hover\:bg-usky {
+    @media (width >= 48rem) {
+      &:hover {
+        @media (hover: hover) {
+          background-color: var(--color-usky);
+        }
+      }
+    }
+  }
+  .lg\:w-4\/7 {
+    @media (width >= 64rem) {
+      width: calc(4/7 * 100%);
     }
   }
 }

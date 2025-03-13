@@ -22,7 +22,7 @@
                 <?php foreach($params["pages"] as $page): ?>
                 <li class="<?php
                 if ($page != "Login") {
-                    echo "w-full py-4 md:py-1 border-solid border-b-2 border-gray-300 md:border-0 md:w-auto md:px-2 hover:bg-usky";
+                    echo "w-full py-4 md:py-1 border-solid border-b-2 border-gray-300 md:border-0 md:w-auto md:px-2 md:hover:bg-usky";
                 } else {
                     echo "w-full py-4 md:py-1 border-solid border-b-2 border-gray-300 md:border-3 md:border-ured text-ured md:px-2 md:w-auto";
                 }
@@ -42,7 +42,9 @@
         <a href="#" class="text-white">Informativa sui cookie</a>
     </footer>
     <!-- Script injection -->
-    <script src="js/index.js"></script>
+    <?php foreach ($params["scripts"] as $script): ?>
+    <script src="js/<?php echo $script ?>"></script>
+    <?php endforeach; ?>
 </body>
 
 </html>
