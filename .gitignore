@@ -2,3 +2,5 @@
 db/creation.sql
 assets/prod/**
 tailwindcss.exe
+index.html
+*.html
