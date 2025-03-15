@@ -1,5 +1,5 @@
 <?php
-class DatabaseHelper{
+class DatabaseHelper {
     private $db;
 
     public function __construct($servername, $username, $password, $dbname, $port){
@@ -29,7 +29,8 @@ class DatabaseHelper{
         return $result->fetch_all(MYSQLI_ASSOC);
     }
 
-    public function getMostPurchasedProducts($n=-1) {
+    public function getMostPurchasedProducts($n=-1)
+    {
         $query = "SELECT id, title, description, price, discount_price, image_name, sold_count
                 FROM products
                 ORDER BY sold_count DESC";
@@ -45,6 +46,30 @@ class DatabaseHelper{
         $result = $stmt->get_result();
 
         return $result->fetch_all(MYSQLI_ASSOC);
+    }
+
+    // returns true if the username is unique
+    public function checkUsernameAvailability($username)
+    {
+        $stmt = $this->db->prepare("SELECT COUNT(*) AS count FROM users WHERE username = ?");
+        $stmt->bind_param('s', $username);
+        $stmt->execute();
+        
+        $result = $stmt->get_result();
+        $row = $result->fetch_assoc();
+        return $row["count"] == 0;
+    }
+
+    // returns true if the username is unique
+    public function checkEmailAvailability($email)
+    {
+        $stmt = $this->db->prepare("SELECT COUNT(*) AS count FROM users WHERE email = ?");
+        $stmt->bind_param('s', $email);
+        $stmt->execute();
+
+        $result = $stmt->get_result();
+        $row = $result->fetch_assoc();
+        return $row["count"] == 0;
     }
 }
 ?>

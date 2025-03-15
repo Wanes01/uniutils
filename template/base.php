@@ -20,14 +20,14 @@
         <nav class="hidden bg-white w-full md:flex md:flex-1">
             <ul class="md:flex md:flex-row md:flex-1 md:items-center md:justify-end md:gap-3 md:mr-3">
                 <?php foreach($params["pages"] as $page): ?>
-                <li class="<?php
+                <li class="w-full border-solid border-b-2 last:border-b-3 border-gray-300 last:border-black md:rounded-sm <?php
                 if ($page != "Login") {
-                    echo "w-full py-4 md:py-1 border-solid border-b-2 border-gray-300 md:border-0 md:w-auto md:px-2 md:hover:bg-usky";
+                    echo "md:border-0 md:w-auto md:hover:bg-usky";
                 } else {
-                    echo "w-full py-4 md:py-1 border-solid border-b-2 border-gray-300 md:border-3 md:border-ured text-ured md:px-2 md:w-auto";
+                    echo "md:border-3 md:last:border-ured text-ured md:w-auto";
                 }
                     ?>"><a
-                        class="flex flex-row gap-1 w-full justify-center items-center font-bold" href="<?php echo strtolower($page)?>">
+                        class="flex flex-row gap-1 md:py-1 md:px-2 py-6 w-full justify-center items-center font-bold" href="<?php echo strtolower($page)?>">
                         <img src="assets/icons/<?php echo strtolower($page)?>.png" alt="" class="w-3 h-3 md:mb-0.5" />
                         <?php echo $page?></a></li>
                 <?php endforeach; ?>
