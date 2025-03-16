@@ -54,4 +54,15 @@ function isPasswordStrongEnough($password) {
     return preg_match($regex, $password);
 }
 
+/* Saves the user data into the current session */
+function loginUser($userData) {
+    $_SESSION["userId"] = $userData["id"];
+    $_SESSION["name"] = $userData["first_name"];
+    $_SESSION["surname"] = $userData["last_name"];
+    $_SESSION["address"] = $userData["address"];
+    $_SESSION["username"] = $userData["username"];
+    $_SESSION["email"] = $userData["email"];
+    $_SESSION["isClient"] = $userData["role"] == 1; // 1 = client, 0 = vendor
+}
+
 ?>

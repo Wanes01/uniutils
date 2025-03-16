@@ -58,5 +58,31 @@ async function registerSubmitter(formData, errorList) {
         return;
     }
     // The registration was successfull. Redirects the user to the login
+    await showDisappearingInfoModal(
+        "Registrazione avvenuta con successo! Stai per essere rediretto al login ✅", 5000
+    )
     fillMain(mainLogin);
+}
+
+/* Utility function to delay the execution of following code */
+function sleep(milliseconds) {
+    return new Promise(resolve => setTimeout(resolve, milliseconds));
+}
+
+async function loginSubmitter(formData, errorList) {
+    const response = await apiCaller("login-user.php", "POST", formData);
+    // Login failed
+    if (!response.success) {
+        errorList.classList.remove("hidden");
+        errorList.innerHTML = "";
+        const errLine = document.createElement("li");
+        errLine.innerText = response.message;
+        errorList.appendChild(errLine);
+        return;
+    }
+    // The registration was successfull. Redirects the user to the login
+    await showDisappearingInfoModal(
+        "Login avvenuto con successo. Stai per essere rediretto alla Vetrina ✅", 5000
+    )
+    fillMain(mainVetrina);
 }

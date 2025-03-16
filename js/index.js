@@ -38,6 +38,7 @@ const HREF_TO_MAINFUNCTION = {
 
 const ACTION_TO_FORMSUBMITTER = {
     'register' : registerSubmitter,
+    'login' : loginSubmitter,
 }
 
 /* All links in the main are generated dynamically, which means that you cannot attach

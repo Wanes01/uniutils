@@ -71,5 +71,24 @@ class DatabaseHelper {
         $row = $result->fetch_assoc();
         return $row["count"] == 0;
     }
+
+    /* register a new user. All fields must be validated before calling this function
+    role = 1 registers a new client, role = 0 registers a new vendor */
+    public function registerUser($name, $surname, $address, $email, $username, $encrPass, $role = 1) {
+        $query = "INSERT INTO users (first_name, last_name, address, email, username, password_hash, role) 
+            VALUES (?, ?, ?, ?, ?, ?, ?);";
+        $stmt = $this->db->prepare($query);
+        $stmt->bind_param('ssssssi', $name, $surname, $address, $email, $username, $encrPass, $role);
+        $stmt->execute();
+    }
+
+    public function getUserInfo($email) {
+        $query = "SELECT id, first_name, last_name, address, username, email, password_hash, role FROM users WHERE email = ?";
+        $stmt = $this->db->prepare($query);
+        $stmt->bind_param('s', $email);
+        $stmt->execute();
+        $result = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+        return $result;
+    }
 }
 ?>

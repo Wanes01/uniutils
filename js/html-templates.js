@@ -96,16 +96,14 @@ function mainLogin() {
                         <fieldset class="flex flex-col min-w-0">
                             <legend class="invisible h-0">Credenziali</legend>
                             <label for="email" class="mt-3 md:mt-6">Email</label>
-                            <input type="email" name="email" id="email"
+                            <input type="email" name="email" id="email" required autocomplete="off"
                                 class="border-1 border-black p-1 rounded-sm focus:outline-2 focus:outline-sky-700 focus:bg-sky-50">
                             <label for="password" class="mt-3 md:mt-6">Password</label>
-                            <input type="password" name="password" id="password"
+                            <input type="password" name="password" id="password" required autocomplete="off"
                                 class="border-1 border-black p-1 rounded-sm focus:outline-2 focus:outline-sky-700 focus:bg-sky-50">
                         </fieldset>
-                        <!-- Error text -->
-                        <p class="hidden mt-6 font-medium text-red-700 text-clip">
-                            Errore!
-                        </p>
+                        <ul class="hidden list-disc list-inside mt-6 text-red-700 text-clip md:col-span-2 text-sm">
+                        </ul>
                         <input type="submit" name="login" value="Accedi"
                             class="cursor-pointer border-1 border-black mt-6 md:mt-12 mb-3 py-1 rounded-full active:inset-shadow-sm active:inset-shadow-gray-800">
                     </form>
@@ -180,4 +178,20 @@ function mainRegister() {
                 </form>
             </div>
         </div>`;
+}
+
+async function showDisappearingInfoModal(message, time) {
+    const div = document.querySelector("main > div");
+    div.classList.add("blur-sm");
+    document.querySelector("main").innerHTML +=
+    `
+    <div class="fixed top-1/2 left-1/2 z-50 transform -translate-x-1/2 -translate-y-1/2
+    py-8 px-10 text-center rounded-md bg-white border-1 border-gray-400 flex flex-row font-medium
+    shadow-xl shadow-gray-800">
+        <p>${message}</p>
+    </div>
+    `
+    await sleep(time);
+    //div.classList.remove("blur-sm");
+
 }
