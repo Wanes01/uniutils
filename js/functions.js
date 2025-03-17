@@ -31,11 +31,32 @@ function extractLastName(path) {
     return path.match(/([^\/]*)\/*$/)[1];
 }
 
+async function getUserInfo() {
+    const info = await apiCaller("session-info.php");
+    return info;
+}
+
 /* Fills the main tag with the result of the given function.
 See html-templates.js for the specific functions */
 async function fillMain(mainFunction) {
     const main = document.querySelector("main");
     main.innerHTML = await mainFunction();
+}
+
+async function fillNavigation() {
+    const linkList = document.querySelector("body > header > nav:last-of-type > ul");
+    const links =  (await getUserInfo()).navigation;
+    linkList.innerHTML = "";
+    links.forEach(link => {
+        linkList.innerHTML += generateNavItem(link);
+    });
+
+    const notificationShortcut = document.querySelector("body > header > nav > img");
+    if (links.includes("Notifiche")) {
+        notificationShortcut.classList.remove("hidden");
+    } else {
+        notificationShortcut.classList.add("hidden");
+    }
 }
 
 /* Manages the user registration.
@@ -59,7 +80,7 @@ async function registerSubmitter(formData, errorList) {
     }
     // The registration was successfull. Redirects the user to the login
     await showDisappearingInfoModal(
-        "Registrazione avvenuta con successo! Stai per essere rediretto al login ✅", 5000
+        "Registrazione avvenuta con successo! Stai per essere rediretto al login ✅", 2500
     )
     fillMain(mainLogin);
 }
@@ -82,7 +103,24 @@ async function loginSubmitter(formData, errorList) {
     }
     // The registration was successfull. Redirects the user to the login
     await showDisappearingInfoModal(
-        "Login avvenuto con successo. Stai per essere rediretto alla Vetrina ✅", 5000
+        "Login avvenuto con successo. Stai per essere rediretto alla Vetrina ✅", 2500
     )
     fillMain(mainVetrina);
+    // the navigation menú changes on login or logout
+    fillNavigation();
+}
+
+/* Logs the user out. Tells the server to close the session
+and resets the interface if succesfull */
+async function logoutUser() {
+    const response = await apiCaller("logout.php");
+    if (response.success) {
+        await showDisappearingInfoModal("Bye bye! 👋", 2500);
+        await fillMain(mainVetrina);
+        await fillNavigation();
+    }
+}
+
+function capitalizeFirstLetter(word) {
+    return String(word).charAt(0).toUpperCase() + String(word).slice(1);
 }

@@ -62,7 +62,42 @@ function loginUser($userData) {
     $_SESSION["address"] = $userData["address"];
     $_SESSION["username"] = $userData["username"];
     $_SESSION["email"] = $userData["email"];
-    $_SESSION["isClient"] = $userData["role"] == 1; // 1 = client, 0 = vendor
+    $_SESSION["isCustomer"] = $userData["role"] == 1; // 1 = client, 0 = vendor
+}
+
+/* Get the current session info */
+function getSessionInfo() {
+    $defaultPages = array("Vetrina", "Catalogo", "Contatti");
+
+    $loggedOutPages = array("Login");
+    $customerPages = array("Notifiche", "Carrello", "Ordini", "Logout");
+    $vendorPages = array("Notifiche", "Ordini", "Logout");
+
+    $response["loggedIn"] = isset($_SESSION["userId"]);
+
+    // user is not logged in
+    if (!isset($_SESSION["userId"])) {
+        $response["navigation"] = array_merge($defaultPages, $loggedOutPages);
+        return $response;
+    }
+
+    // user is logged in, shares the user info
+    $userInfoKeys = array("userId", "name", "surname", "address", "username", "email", "isCustomer");
+
+    foreach ($userInfoKeys as $key) {
+        $response["user"][$key] = $_SESSION[$key];
+    }
+
+    $response["navigation"] = array_merge(
+        $defaultPages,
+        $_SESSION["isCustomer"] ? $customerPages : $vendorPages
+    );
+
+    return $response;
+}
+
+function isUserLoggedIn() {
+    return isset($_SESSION["userId"]);
 }
 
 ?>

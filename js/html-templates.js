@@ -41,20 +41,31 @@ function generateProductPreview(productData) {
 }
 
 async function mainVetrina() {
+    const userInfo = await getUserInfo();
     const welcome = `
     <div class="md:px-10 px-2 mb-7">
     <section class="md:flex md:flex-row">
         <img class="hidden md:inline md:w-1/4 md:object-cover" src="assets/imgs/girl_studying.png" alt="" />
         <div class="flex flex-col justify-center text-center my-3 mx-2 md:w-1/2">
-            <h1 class="text-2xl font-bold">Benvenuto su UniUtils! 🎓</h1>
-            <p class="text-base/8 mt-2">Un vasto assortimento per studenti e
+            <h1 class="text-2xl font-bold">${
+                userInfo.loggedIn ? `Bentornato ${userInfo.user.name}! 👋` : "Benvenuto su UniUtils! 🎓" 
+            }</h1>
+            <p class="text-base/8 mt-2">${
+                (!userInfo.loggedIn || userInfo.user.isCustomer)
+                    ? `Per te un vasto assortimento per studenti e
                 docenti, con articoli che vanno dall'
-                <a href="#" class="bg-ured p-1 rounded-md">hardware</a>
+                <a href="#" class="bg-ured p-1 rounded-md underline">hardware</a>
                 avanzato agli strumenti di
-                <a href="#" class="bg-uorange p-1 rounded-md">cancelleria</a>,
+                <a href="#" class="bg-uorange p-1 rounded-md underline">cancelleria</a>,
                 fino ai migliori
-                <a href="#" class="bg-uyellow p-1 rounded-md">prodotti</a>
-                per laboratori, progettazione e studio. Consegna rapida nel campus!
+                <a href="#" class="bg-uyellow p-1 rounded-md underline">prodotti</a>
+                per laboratori, progettazione e studio. Consegna rapida nel campus!`
+                    : `Gestisci i prodotti in vendita nel
+                <a href="catalogo" class="bg-ured p-1 rounded-md underline">catalogo</a>
+                e gestisci gli
+                <a href="ordini" class="bg-uorange p-1 rounded-md underline">ordini</a>
+                avviati dai clienti nelle apposite pagine.`
+            }
             </p>
         </div>
         <img class="hidden md:inline md:w-1/4 md:object-cover" src="assets/imgs/boy_studying.png" alt="" />
@@ -62,7 +73,11 @@ async function mainVetrina() {
 
     let offers = `<!-- Sezione offerte -->
     <section class="mt-3 md:mx-2">
-        <h2 class="text-xl font-bold text-center">Offerte che potrebbero interessarti</h2>
+        <h2 class="text-xl font-bold text-center">${
+            (!userInfo.loggedIn || userInfo.user.isCustomer)
+                ? "Offerte che potrebbero interessarti"
+                : "Alcune offerte attive suoi tuoi prodotti"
+        }</h2>
         <!-- Product container -->
         <div class="flex flex-col md:flex-row gap-2 mt-2">`;
         
@@ -81,6 +96,16 @@ async function mainVetrina() {
     </section>
     </div>`;
     return welcome + offers + mostPurchased;
+}
+
+function generateNavItem(linkTitle) {
+    return `<li class="w-full border-b-3 border-gray-300 md:rounded-sm active:inset-shadow-xs active:inset-shadow-gray-600 ${
+        linkTitle != "Login" ? "md:hover:border-b-black md:w-auto md:hover:bg-usky" : "md:last:border-udred text-udred md:w-auto md:hover:bg-ulyellow"
+        } ${
+            linkTitle == "Notifiche" ? "hidden md:block" : ""
+        }"><a class="flex flex-row gap-1 md:py-1 md:px-2 py-6 w-full justify-center items-center font-bold" href="${linkTitle.toLowerCase()}">
+            <img src="assets/icons/${linkTitle.toLowerCase()}.png" alt="" class="w-3 h-3 md:mb-0.5" />
+            ${linkTitle}</a></li>`
 }
 
 function mainLogin() {
@@ -111,7 +136,7 @@ function mainLogin() {
                 <section class="flex flex-col px-2 md:h-full md:w-1/2 justify-center items-center h-40 bg-[#FF6142]">
                     <h2 class="font-bold text-center">Sei nuovo da queste parti?<br>
                         Unisciti a noi!</h2>
-                    <a href="register"
+                    <a href="registrazione"
                         class="bg-white px-5 py-2 rounded-full mt-2 border-1 border-black active:inset-shadow-sm active:inset-shadow-gray-800">Registrati</a>
                 </section>
             </div>
@@ -127,7 +152,7 @@ function mainRegister() {
             <div class="flex flex-col items-center justify-center w-5/6 md:w-2/3 lg:w-4/7 m-3 bg-white
                 shadow-[0px_0px_30px_5px_#6C1100] border-1 border-black rounded-sm p-3 md:px-5">
                 <h1 class="font-bold text-xl">Registrazione</h1>
-                <form action="register" class="flex flex-col w-full">
+                <form action="registrazione" class="flex flex-col w-full">
                     <fieldset class="md:grid md:grid-cols-2 md:gap-x-4 min-w-0">
                     <!-- Hidden from visualization but still visible to screen readers -->
                         <legend class="invisible h-0">Anagrafica</legend>
@@ -173,7 +198,7 @@ function mainRegister() {
                     </fieldset>
                     <ul class="hidden list-disc list-inside mt-6 text-red-700 text-clip md:col-span-2 text-sm">
                     </ul>
-                    <input type="submit" name="register" value="Registrati"
+                    <input type="submit" name="registrazione" value="Registrati"
                         class="md:col-span-2 cursor-pointer border-1 border-black mt-6 md:mt-12 mb-3 py-1 rounded-full active:inset-shadow-sm active:inset-shadow-gray-800">
                 </form>
             </div>
@@ -193,5 +218,4 @@ async function showDisappearingInfoModal(message, time) {
     `
     await sleep(time);
     //div.classList.remove("blur-sm");
-
 }

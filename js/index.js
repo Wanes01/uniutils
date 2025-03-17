@@ -17,12 +17,9 @@ popupMenuIcon.addEventListener('click', () => {
     }
 });
 
-/* Closes the popup window on main change */
-document.querySelectorAll("body header nav:last-child ul li").forEach(popupMenuItem => {
-    popupMenuItem.addEventListener('click', () => {
-        popupMenu.classList.add("hidden");
-        popupMenuIcon.src = "assets/icons/menu.png";
-    });
+popupMenu.addEventListener('click', () => {
+    popupMenu.classList.add("hidden");
+    popupMenuIcon.src = "assets/icons/menu.png";
 });
 
 /* 
@@ -33,11 +30,11 @@ LINK HANDLERS
 const HREF_TO_MAINFUNCTION = {
     'vetrina' : mainVetrina,
     'login' : mainLogin,
-    'register' : mainRegister,
+    'registrazione' : mainRegister,
 }
 
 const ACTION_TO_FORMSUBMITTER = {
-    'register' : registerSubmitter,
+    'registrazione' : registerSubmitter,
     'login' : loginSubmitter,
 }
 
@@ -59,9 +56,12 @@ document.body.addEventListener('click', async function(e) {
     /* User clicked on a link */
     if (link != null) {
         const hrefValue = extractLastName(link.href);
-        /* The link may not exist (yet) */
-        if (hrefValue && hrefValue != "#") {
+        /* The link may not exist */
+        if (hrefValue && hrefValue != "logout") {
+            document.title = `UniUtils - ${capitalizeFirstLetter(hrefValue)}`;
             fillMain(HREF_TO_MAINFUNCTION[hrefValue]);
+        } else {
+            await logoutUser();
         }
         return;
     }
@@ -82,3 +82,4 @@ document.body.addEventListener('click', async function(e) {
 });
 
 fillMain(mainVetrina);
+fillNavigation();

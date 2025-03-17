@@ -4,6 +4,7 @@
 
 @theme {
     --font-inter: "Inter", "Arial", "sans-serif";
+    --color-udred: #e42c07;
     --color-ured: #f95738;
     --color-uorange: #ee964b;
     --color-uyellow: #f4d35e;
@@ -11,7 +12,7 @@
     --color-ublue: #0d3b66;
     --color-usky: #b4daff;
 
-    --animate-open: open 0.4s;
+    --animate-open: open 0.2s;
 }
 
 @keyframes open {
