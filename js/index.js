@@ -31,18 +31,25 @@ const HREF_TO_MAINFUNCTION = {
     'vetrina' : mainVetrina,
     'login' : mainLogin,
     'registrazione' : mainRegister,
+    'catalogo' : mainCatalogo,
 }
 
 const ACTION_TO_FORMSUBMITTER = {
     'registrazione' : registerSubmitter,
     'login' : loginSubmitter,
+    'filtra' : productFilterSubmitter,
 }
 
 /* All links in the main are generated dynamically, which means that you cannot attach
 an event handler to them when the page loads. The function below performs an action by
 delegating to the body when a click on a link is detected or a form is submitted. */
 document.body.addEventListener('click', async function(e) {
-    e.preventDefault();
+    /* Mantain the default behavior for all elements except
+    submit inputs and links */
+    if (e.target.closest("a") || e.target.closest("form input[type='submit']")) {
+        e.preventDefault();
+    }
+
     /* closest ensures that the click occurred anywhere inside
     the target element or is the target element itself */
     const link = e.target.closest("a");

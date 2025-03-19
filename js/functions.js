@@ -124,3 +124,39 @@ async function logoutUser() {
 function capitalizeFirstLetter(word) {
     return String(word).charAt(0).toUpperCase() + String(word).slice(1);
 }
+
+// the filters do not consider the search query 
+async function productFilterSubmitter(formData) {
+    const minPrice = Number(formData.get("minPrice"));
+    const maxPrice = Number(formData.get("maxPrice"));
+
+    // do nothing if user set a minimum price higher than the max price
+    if (minPrice > maxPrice && formData.get("maxPrice") != "") {
+        return;
+    }
+
+    const categories = []; // group categories id
+    formData.keys().forEach(key => {
+        if (/^[0-9]\d*$/.test(key)) {
+            categories.push(key);
+        }
+    });
+
+    const fields = {
+        minPrice: formData.get("minPrice"),
+        maxPrice: formData.get("maxPrice"),
+        orderBy: formData.get("orderBy"),
+    };
+
+    if (formData.has("onlyOffers")) {
+        fields.onlyOffers = "true"; // this value has no special meaning, onlyOffers just has to be in the object
+    }
+    if (categories.length > 0) {
+        fields.categories = categories;
+    }
+
+    const params = new URLSearchParams(fields);
+
+    const articlesData = await apiCaller(`filtered-products.php?${params.toString()}`);
+    console.log(articlesData);
+}

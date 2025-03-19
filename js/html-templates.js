@@ -1,19 +1,19 @@
 "use strict";
 
-function generateProductPreview(productData) {
+function generateProductPreview(productData, wClass, heading) {
     const DESCRIPTION_MAX_CHARS = 40;
     const products = [];
 
     for (let i = 0; i < productData.length; i++) {
         products.push(
         `<article
-            class="flex flex-row md:flex-col gap-2 border-1 border-gray-400 shadow-md shadow-gray-500 py-2 px-2 md:w-1/4 rounded-sm">
+            class="flex flex-row md:flex-col gap-2 border-1 ${wClass} border-gray-400 shadow-md shadow-gray-500 py-2 px-2 rounded-sm">
             <header class="flex items-center justify-center basis-1/3">
                 <img class="w-auto md:max-h-40" src="${productData[i].image_name}" alt="${productData[i].title}" />
             </header>
             <div class="flex flex-col w-full h-full">
                 <section>
-                    <h3 class="font-bold">${productData[i].title}</h3>
+                    <${heading} class="font-bold">${productData[i].title}</${heading}>
                     <p class="font-semibold">€${productData[i].price} <del class="text-red-800">${
                         productData[i].discount_price != null ? "€" + productData[i].discount_price : ""
                     }</del>${
@@ -42,7 +42,7 @@ function generateProductPreview(productData) {
 
 async function mainVetrina() {
     const userInfo = await getUserInfo();
-    const welcome = `
+    return `
     <div class="md:px-10 px-2 mb-7">
     <section class="md:flex md:flex-row">
         <img class="hidden md:inline md:w-1/4 md:object-cover" src="assets/imgs/girl_studying.png" alt="" />
@@ -69,9 +69,8 @@ async function mainVetrina() {
             </p>
         </div>
         <img class="hidden md:inline md:w-1/4 md:object-cover" src="assets/imgs/boy_studying.png" alt="" />
-    </section>`;
-
-    let offers = `<!-- Sezione offerte -->
+    </section>
+    <!-- Sezione offerte -->
     <section class="mt-3 md:mx-2">
         <h2 class="text-xl font-bold text-center">${
             (!userInfo.loggedIn || userInfo.user.isCustomer)
@@ -79,23 +78,29 @@ async function mainVetrina() {
                 : "Alcune offerte attive suoi tuoi prodotti"
         }</h2>
         <!-- Product container -->
-        <div class="flex flex-col md:flex-row gap-2 mt-2">`;
-        
-    generateProductPreview(await apiCaller("random-offers.php")).forEach(article => offers += article);
-    offers +=     `</div>
-    </section>`;
-
-    let mostPurchased = `<!-- Sezione prodotti piú venduti -->
+        <div class="flex flex-col md:flex-row gap-2 mt-2">
+            ${await (async () => {
+                let previews = "";
+                const productData = await apiCaller("random-offers.php?quantity=4");
+                generateProductPreview(productData, "md:w-1/4", "h3").forEach(article => previews += article);
+                return previews;
+            })()}
+         </div>
+    </section>
+    <!-- Sezione prodotti piú venduti -->
     <section class="mt-6 md:mx-2">
         <h2 class="text-xl font-bold text-center">I piú venduti</h2>
         <!-- Product container -->
-        <div class="flex flex-col md:flex-row gap-2 mt-2">`;
-
-    generateProductPreview(await apiCaller("most-purchased.php")).forEach(article => mostPurchased += article);
-    mostPurchased +=     `</div>
+        <div class="flex flex-col md:flex-row gap-2 mt-2">
+            ${await (async () => {
+                let previews = "";
+                const productData = await apiCaller("most-purchased.php?quantity=4");
+                generateProductPreview(productData, "md:w-1/4", "h3").forEach(article => previews += article);
+                return previews;
+            })()}
+        </div>
     </section>
     </div>`;
-    return welcome + offers + mostPurchased;
 }
 
 function generateNavItem(linkTitle) {
@@ -203,6 +208,118 @@ function mainRegister() {
                 </form>
             </div>
         </div>`;
+}
+
+async function mainCatalogo() {
+    const SHOWN_PRODUCTS = 9;
+    return `
+        <!-- Div per lo stile del page flow -->
+    <h1 class="text-center text-xl font-bold mb-5">Prodotti del catalogo</h1>
+    <div class="flex flex-col md:flex-row m-2 gap-5">
+        <!-- Sidebar con i filtri di ricerca -->
+        <aside class="border-gray-400 border-1 md:border-0 rounded-md px-2 py-1 md:w-7/24">
+            <h2 class="font-semibold text-center md:text-lg">Filtri</h2>
+            <!-- flex / hidden in versione mobile -->
+            <form action="filtra" class="px-2 py-1 flex flex-col gap-5">
+                <fieldset class="border border-solid border-gray-400 p-3 rounded-sm">
+                    <legend class="font-medium">Prezzo</legend>
+                    <ul class="flex flex-col gap-2">
+                        <li class="flex flex-row gap-1">
+                            <label for="minPrice">Minimo</label>
+                            <input type="number" name="minPrice" id="minPrice" min="0.01" step=".01"
+                                class="border-black border-1 rounded-sm w-24 px-1
+                                [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none">
+                        </li>
+                        <li class="flex flex-row gap-1">
+                            <label for="maxPrice">Massimo</label>
+                            <input type="number" name="maxPrice" id="maxPrice" min="0.01" step=".01"
+                                class="border-black border-1 rounded-sm w-24 px-1
+                                [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none">
+                        </li>
+                        <li class="flex flex-row gap-1">
+                            <label for="onlyOffers">Mostra solo offerte</label>
+                            <input type="checkbox" name="onlyOffers" id="onlyOffers" class="w-4 accent-ured">
+                        </li>
+                    </ul>
+                </fieldset>
+                <fieldset class="border border-solid border-gray-400 p-3 rounded-sm">
+                    <legend class="font-medium">Categorie</legend>
+                    <ul class="flex flex-col gap-2">
+                        ${await (async () => {
+                            let categories = "";
+                            const categoriesData = await apiCaller("categories-info.php");
+                            categoriesData.forEach(category => {
+                                categories +=
+                                `
+                                <li class="flex flex-row gap-2">
+                                    <input type="checkbox" name="${category.id}" id="category${category.id}" class="w-4 accent-ured">
+                                    <label for="category${category.id}">${category.name}</label>
+                                </li>
+                                `
+                            });
+                            return categories;
+                        })()}
+                    </ul>
+                </fieldset>
+                <fieldset class="border border-solid border-gray-400 p-3 rounded-sm">
+                    <legend class="font-medium">Ordina per</legend>
+                    <ul class="flex flex-col gap-y-2">
+                        <li>
+                            <input type="radio" name="orderBy" id="popularity" value="popularity" checked="checked"
+                                class="w-4 accent-ured">
+                            <label for="popularity">Popolaritá</label>
+                        </li>
+                        <li>
+                            <input type="radio" name="orderBy" id="decreasingPrice" value="decreasingPrice"
+                            class="w-4 accent-ured">
+                            <label for="decreasingPrice">Prezzo decrescente</label>
+                        </li>
+                        <li>
+                            <input type="radio" name="orderBy" id="increasingPrice" value="increasingPrice"
+                            class="w-4 accent-ured">
+                            <label for="increasingPrice">Prezzo crescente</label>
+                        </li>
+                        <li>
+                            <input type="radio" name="orderBy" id="random" value="random"
+                            class="w-4 accent-ured">
+                            <label for="random">Casuale</label>
+                        </li>
+                    </ul>
+                </fieldset>
+                <input type="submit" value="Applica filtri"
+                    class="cursor-pointer border-1 border-gray-500 bg-ulred py-1 rounded-full active:inset-shadow-sm active:inset-shadow-gray-800">
+                <input type="reset" value="Reimposta filtri"
+                    class="cursor-pointer border-1 border-gray-500 py-1 rounded-full active:inset-shadow-sm active:inset-shadow-gray-800">
+            </form>
+        </aside>
+        <!-- Sezione ricerca a visualizzazione multipagina prodotti -->
+        <section class="w-full">
+            <header>
+                <form action="" class="flex flex-col md:flex-row md:items-center md:gap-2">
+                    <label for="productSearch">Cerca in base a nome/descrizione </label>
+                    <div class="flex flex-row flex-1">
+                        <input type="search" name="productSearch" id=" productSearch"
+                            class="w-full rounded-l-full px-3 py-1 border-1 border-r-0 border-gray-400"
+                            placeholder="Nome prodotto / descrizione prodotto" />
+                        <input type="submit" value="Cerca" class="cursor-pointer rounded-r-full px-4 py-1 border-1 border-l-0 border-gray-400
+                            bg-ured active:inset-shadow-sm active:inset-shadow-gray-800">
+                    </div>
+                </form>
+            </header>
+            <div class="flex flex-col gap-3 py-5 md:grid md:grid-cols-3">
+            ${await (async () => {
+                let previews = "";
+                const productData = await apiCaller(`most-purchased.php?quantity=${SHOWN_PRODUCTS}`);
+                generateProductPreview(productData, "", "h2").forEach(article => previews += article);
+                return previews;
+            })()}
+            </div>
+            <!-- Multipagina -->
+            <footer>
+
+            </footer>
+        </section>
+    </div>`;
 }
 
 async function showDisappearingInfoModal(message, time) {
