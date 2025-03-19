@@ -81,7 +81,9 @@ async function mainVetrina() {
         <div class="flex flex-col md:flex-row gap-2 mt-2">
             ${await (async () => {
                 let previews = "";
-                const productData = await apiCaller("random-offers.php?quantity=4");
+                const productData = await apiCaller(
+                    "filtered-products.php?minPrice=&maxPrice=&orderBy=random&from=0&howMany=4&onlyOffers="
+                );
                 generateProductPreview(productData, "md:w-1/4", "h3").forEach(article => previews += article);
                 return previews;
             })()}
@@ -94,7 +96,9 @@ async function mainVetrina() {
         <div class="flex flex-col md:flex-row gap-2 mt-2">
             ${await (async () => {
                 let previews = "";
-                const productData = await apiCaller("most-purchased.php?quantity=4");
+                const productData = await apiCaller(
+                    "filtered-products.php?minPrice=&maxPrice=&orderBy=popularity&from=0&howMany=4"
+                );
                 generateProductPreview(productData, "md:w-1/4", "h3").forEach(article => previews += article);
                 return previews;
             })()}
@@ -309,7 +313,9 @@ async function mainCatalogo() {
             <div class="flex flex-col gap-3 py-5 md:grid md:grid-cols-3">
             ${await (async () => {
                 let previews = "";
-                const productData = await apiCaller(`most-purchased.php?quantity=${SHOWN_PRODUCTS}`);
+                const productData = await apiCaller(
+                    "filtered-products.php?minPrice=&maxPrice=&orderBy=popularity&from=0&howMany=9"
+                );
                 generateProductPreview(productData, "", "h2").forEach(article => previews += article);
                 return previews;
             })()}

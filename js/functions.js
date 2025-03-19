@@ -126,7 +126,10 @@ function capitalizeFirstLetter(word) {
 }
 
 // the filters do not consider the search query 
-async function productFilterSubmitter(formData) {
+async function productFilterSubmitter(formData, productsPerPage, page) {
+    productsPerPage = 9;
+    page = 0;
+
     const minPrice = Number(formData.get("minPrice"));
     const maxPrice = Number(formData.get("maxPrice"));
 
@@ -142,14 +145,18 @@ async function productFilterSubmitter(formData) {
         }
     });
 
+    // mandatory fields
     const fields = {
         minPrice: formData.get("minPrice"),
         maxPrice: formData.get("maxPrice"),
         orderBy: formData.get("orderBy"),
+        from: (page * productsPerPage),
+        howMany: productsPerPage
     };
 
+    // optional fields
     if (formData.has("onlyOffers")) {
-        fields.onlyOffers = "true"; // this value has no special meaning, onlyOffers just has to be in the object
+        fields.onlyOffers = ""; // this value has no special meaning, onlyOffers just has to be in the object
     }
     if (categories.length > 0) {
         fields.categories = categories;

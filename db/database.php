@@ -98,40 +98,32 @@ class DatabaseHelper {
         return $result;
     }
 
-    public function filterProducts(
-        $minPrice = 0,
-        $maxPrice = 99999999.99,
-        $orderBy = "popularity",
-        $categories = [],
-        $onlyOffers = false,
-        $search = "",
-        $limitStart = null,
-        $limitEnd = null) {
+    public function filterProducts($options) {
 
         $query = "SELECT p.id, p.title, p.description, p.price, p.discount_price, p.image_name, 
         p.sold_count, p.quantity_available FROM products p";
         // Categories selected. Inner joins to access categories data
-        if (count($categories) !== 0) {
+        if (isset($options["categories"])) {
             $query .= " JOIN product_categories pc ON p.id = pc.product_id";
         }
         $query .= " WHERE p.price BETWEEN ? AND ?";
 
-        if ($onlyOffers) {
+        if (isset($options["onlyOffers"])) {
             $query .= " AND p.discount_price IS NOT NULL";
         }
 
-        if (count($categories) !== 0) {
+        if (isset($options["categories"])) {
             // adds a "?" inside brackets for each category
-            $query .= " AND pc.category_id IN (" . implode(',', array_fill(0, count($categories), '?')) . ")";
+            $query .= " AND pc.category_id IN (" . implode(',', array_fill(0, count($options["categories"]), '?')) . ")";
         }
 
         // search box not empty
-        if (strlen($search) !== 0) {
+        if (isset($options["search"])) {
             $query .= " AND (p.title LIKE ? OR p.description LIKE ?)";
         }
 
         // result ordering
-        switch ($orderBy) {
+        switch ($options["orderBy"]) {
             case "decreasingPrice":
                 $query .= " ORDER BY p.price DESC";
                 break;
@@ -145,34 +137,37 @@ class DatabaseHelper {
                 $query .= " ORDER BY p.sold_count DESC";
         }
 
-        if ($limitStart !== null && $limitEnd !== null) {
-            $query .= " LIMIT ?, ?";
+        $query .= " LIMIT ?, ?";
+
+        // LOGS
+        error_log(var_export($query, true));
+
+        // Puts parameters in the correct order and format
+        $pType = "dd";
+        $params = array($options["minPrice"], $options["maxPrice"]);
+
+        if (isset($options["categories"])) {
+            $pType .= str_repeat("i", count($options["categories"]));
+            $params = array_merge($params, $options["categories"]);
         }
 
-        // BIND PARAMETERS
-        //$pType = "dd";
-        $params = array($minPrice, $maxPrice);
-
-        if (count($categories) !== 0) {
-            //$pType .= str_repeat("i", count($categories));
-            $params = array_merge($params, $categories);
+        if (isset($options["search"])) {
+            $pType .= "ss";
+            array_push($params, "%" . $options["search"] . "%");
+            array_push($params, "%" . $options["search"] . "%");
         }
 
-        if (strlen($search) !== 0) {
-            //$pType .= "ss";
-            array_push($params, "%" . $search . "%");
-            array_push($params, "%" . $search . "%");
-        }
+        $pType .= "ii";
+        array_push($params, $options["from"]);
+        array_push($params, $options["howMany"]);
 
-        if ($limitStart !== null && $limitEnd !== null) {
-            //$pType .= "ii";
-            array_push($params, $limitStart);
-            array_push($params, $limitEnd - $limitStart);
-        }
+        // query execution
+        $stmt = $this->db->prepare($query);
+        $stmt->bind_param($pType, ...$params);
+        $stmt->execute();
+        $result = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 
-        // It's not possibile to use bind_params because it doesn't accept variable length arrays.
-        $result = $this->db->execute_query($query, $params);
-        return $result->fetch_all(MYSQLI_ASSOC);
+        return $result;
     }
 }
 ?>
