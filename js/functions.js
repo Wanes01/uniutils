@@ -126,7 +126,7 @@ function capitalizeFirstLetter(word) {
 }
 
 // the filters do not consider the search query 
-function productsURIParmsBuilder(formData, productsPerPage, page) {
+function productsURIParmsBuilder(formData, page, productsPerPage) {
     const minPrice = Number(formData.get("minPrice"));
     const maxPrice = Number(formData.get("maxPrice"));
 
@@ -165,11 +165,15 @@ function productsURIParmsBuilder(formData, productsPerPage, page) {
     return new URLSearchParams(fields).toString();
 }
 
-async function productFilterSubmitter(filtersData, searchData) {
+async function productFilterSubmitter(
+    filtersData,
+    searchData,
+    page = 1,
+    productsPerPage = CATALOGO_CONSTANTS.productsPerPage) {
     filtersData.append("search", searchData.get("search"));
-    const uriParams = productsURIParmsBuilder(filtersData, 8, 1);
+    const uriParams = productsURIParmsBuilder(filtersData, page, productsPerPage);
     //console.log(uriParams);
     await fillMain(async () => {
-        return await mainCatalogo(uriParams, 8, 1);
+        return await mainCatalogo(uriParams, page, productsPerPage);
     });
 }

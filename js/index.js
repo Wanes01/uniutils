@@ -41,6 +41,13 @@ const ACTION_TO_FORMSUBMITTER = {
     'cerca' : productFilterSubmitter,
 }
 
+const CATALOGO_CONSTANTS = {
+    productsPerPage : 8,
+    get defaultFilterOptions() {
+        return "minPrice=&maxPrice=&orderBy=popularity&from=0&howMany=" + this.productsPerPage;
+    }
+}
+
 /* All links in the main are generated dynamically, which means that you cannot attach
 an event handler to them when the page loads. The function below performs an action by
 delegating to the body when a click on a link is detected or a form is submitted. */
@@ -55,11 +62,7 @@ document.body.addEventListener('click', async function(e) {
 
     // special behavior for the reset button of the Catalogo forms
     if (e.target.closest("form[action='filtra'] input[type='reset']")) {
-        await fillMain(async () => {
-            return await HREF_TO_MAINFUNCTION["catalogo"](
-                "minPrice=&maxPrice=&orderBy=popularity&from=0&howMany=8", 8, 1
-            );
-        });
+        await fillMain(HREF_TO_MAINFUNCTION["catalogo"]);
         return;
     }
 
@@ -80,31 +83,31 @@ document.body.addEventListener('click', async function(e) {
             return;
         }
 
-        // Jumps into the category page with a category already selected
+        // Jumps into the catalogo with a category already selected
         if (hrefValue.match(/^catalogo#([0-9])+$/)) {
             const categoryID = hrefValue.match(/^catalogo#([0-9])+$/)[1];
             await fillMain(async () => {
                 return await HREF_TO_MAINFUNCTION["catalogo"](
-                    `minPrice=&maxPrice=&orderBy=popularity&from=0&howMany=8&categories=${categoryID}`, 8, 1
+                    `${CATALOGO_CONSTANTS.defaultFilterOptions}&categories=${categoryID}`,
                 );
             });
-            return;
+        // Jumps into the catalogo at the specified products page
+        } else if (hrefValue.match(/^productPage#([0-9])+$/)) {
+            const pageNumber = Number(hrefValue.match(/^productPage#([0-9])+$/)[1]);
+            // user may be changing product page AFTER applying filters
+            const [filters, searchBar] = document.querySelectorAll("form");
+            await ACTION_TO_FORMSUBMITTER["filtra"](
+                new FormData(filters),
+                new FormData(searchBar),
+                pageNumber
+            );
+        // Logs out the user
+        } else if (hrefValue == "logout") {
+            await logoutUser();
+        // Execute the main filler function associated with the link href value
+        } else {
+            await fillMain(HREF_TO_MAINFUNCTION[hrefValue]);
         }
-
-        switch (hrefValue) {
-            case "logout":
-                await logoutUser();
-                break;
-            case "catalogo":
-                await fillMain(async () => {
-                    return await HREF_TO_MAINFUNCTION[hrefValue](
-                        "minPrice=&maxPrice=&orderBy=popularity&from=0&howMany=8", 8, 1
-                    );
-                });
-                break;
-            default:
-                await fillMain(HREF_TO_MAINFUNCTION[hrefValue]);
-            }
         return;
     }
 
@@ -129,7 +132,10 @@ document.body.addEventListener('click', async function(e) {
         case 'cerca':
             // on submit the data of both the filters and the search bar is sent to the server
             const [filters, searchBar] = document.querySelectorAll("form");
-            await ACTION_TO_FORMSUBMITTER[action](new FormData(filters), new FormData(searchBar));
+            await ACTION_TO_FORMSUBMITTER[action](
+                new FormData(filters),
+                new FormData(searchBar),
+            );
     }
 });
 

@@ -214,7 +214,10 @@ function mainRegister() {
         </div>`;
 }
 
-async function mainCatalogo(uriParams, productsPerPage, page) {
+async function mainCatalogo(
+    uriParams = CATALOGO_CONSTANTS.defaultFilterOptions,
+    activePage = 1,
+    productsPerPage = CATALOGO_CONSTANTS.productsPerPage) {
     /*
     Da passare:
     - query formata dal form
@@ -234,7 +237,7 @@ async function mainCatalogo(uriParams, productsPerPage, page) {
                     <legend class="font-medium">Prezzo</legend>
                     <ul class="flex flex-col gap-2">
                         <li class="flex flex-row gap-1">
-                            <label for="minPrice">Minimo</label>
+                            <label for="minPrice">Minimo €</label>
                             <input type="number" name="minPrice" id="minPrice" min="0.01" step=".01"
                                 ${(() => {
                                     // regular expression to check if minPrice is used or not
@@ -246,7 +249,7 @@ async function mainCatalogo(uriParams, productsPerPage, page) {
                                 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none">
                         </li>
                         <li class="flex flex-row gap-1">
-                            <label for="maxPrice">Massimo</label>
+                            <label for="maxPrice">Massimo €</label>
                             <input type="number" name="maxPrice" id="maxPrice" min="0.01" step=".01"
                                 ${(() => {
                                     // regular expression to check if maxPrice is used or not
@@ -347,7 +350,7 @@ async function mainCatalogo(uriParams, productsPerPage, page) {
                     </div>
                 </form>
             </header>
-            <div class="flex flex-col gap-3 py-5 md:grid md:grid-cols-4">
+            <div class="flex flex-col gap-3 py-5 md:grid md:grid-cols-4 md:grid-rows-2 md:grow">
             ${await (async () => {
                 let previews = "";
                 const productData = await apiCaller(`filtered-products.php?${uriParams}`);
@@ -356,8 +359,8 @@ async function mainCatalogo(uriParams, productsPerPage, page) {
             })()}
             </div>
             <!-- Multipagina -->
-            <footer>
-                <ul class="flex flex-row justify-center gap-4">
+            <footer class="flex flex-row justify-center">
+                <ul class="w-auto flex flex-row justify-center border-1 rounded-md">
                 ${await (async () => {
                     const totalProducts = (await apiCaller(
                         `filtered-products.php?${uriParams}&count=`
@@ -365,10 +368,12 @@ async function mainCatalogo(uriParams, productsPerPage, page) {
                     const totalPages = Math.ceil(totalProducts / productsPerPage);
                     let numbers = "";
                     for (let i = 1; i <= totalPages; i++) {
-                        // bg-ublue text-white
                         numbers += `
                         <li>
-                            <a href="#" class="block bg-usky font-semibold text-xl py-2 px-3 rounded-sm">${i}</a>
+                            <a href="productPage#${i}" class="block ${
+                            activePage == i ? "bg-ulred" : ""
+                            } font-semibold text-xl py-2 px-4 ${
+                            i < totalPages ? "border-r-1" : "" }">${i}</a>
                         <li>`;
                     }
                     return numbers;
