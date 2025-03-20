@@ -43,12 +43,12 @@ async function fillMain(mainFunction) {
     main.innerHTML = await mainFunction();
 }
 
-async function fillNavigation() {
+async function fillNavigation(active) {
     const linkList = document.querySelector("body > header > nav:last-of-type > ul");
     const links =  (await getUserInfo()).navigation;
     linkList.innerHTML = "";
     links.forEach(link => {
-        linkList.innerHTML += generateNavItem(link);
+        linkList.innerHTML += generateNavItem(link, active);
     });
 
     const notificationShortcut = document.querySelector("body > header > nav > img");
@@ -83,6 +83,7 @@ async function registerSubmitter(formData, errorList) {
         "Registrazione avvenuta con successo! Stai per essere rediretto al login ✅", 2500
     )
     fillMain(mainLogin);
+    fillNavigation("login");
 }
 
 /* Utility function to delay the execution of following code */
@@ -105,9 +106,9 @@ async function loginSubmitter(formData, errorList) {
     await showDisappearingInfoModal(
         "Login avvenuto con successo. Stai per essere rediretto alla Vetrina ✅", 2500
     )
-    fillMain(mainVetrina);
+    await fillMain(mainVetrina);
     // the navigation menú changes on login or logout
-    fillNavigation();
+    await fillNavigation("vetrina");
 }
 
 /* Logs the user out. Tells the server to close the session
@@ -117,7 +118,7 @@ async function logoutUser() {
     if (response.success) {
         await showDisappearingInfoModal("Bye bye! 👋", 2500);
         await fillMain(mainVetrina);
-        await fillNavigation();
+        await fillNavigation("vetrina");
     }
 }
 

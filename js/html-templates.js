@@ -107,9 +107,21 @@ async function mainVetrina() {
     </div>`;
 }
 
-function generateNavItem(linkTitle) {
+function generateNavItem(linkTitle, active) {
     return `<li class="w-full border-b-3 border-gray-300 md:rounded-sm active:inset-shadow-xs active:inset-shadow-gray-600 ${
-        linkTitle != "Login" ? "md:hover:border-b-black md:w-auto md:hover:bg-usky" : "md:last:border-udred text-udred md:w-auto md:hover:bg-ulyellow"
+        (() => {
+            if (linkTitle == "Login") {
+                return active == "login"
+                    ? "md:last:border-udred text-udred md:w-auto md:bg-ulyellow"
+                    : `md:last:border-udred text-udred md:w-auto
+                    md:hover:bg-gradient-to-t md:hover:from-ulyellow md:hover:via-white md:hover:via-80% md:hover:to-white`;
+            } else {
+                return active == linkTitle.toLowerCase()
+                    ? "md:border-b-black md:w-auto md:bg-usky"
+                    : `md:hover:border-b-black md:w-auto
+                    md:hover:bg-gradient-to-t md:hover:from-usky md:hover:via-white md:hover:via-80% md:hover:to-white`;
+            }
+        })()
         } ${
             linkTitle == "Notifiche" ? "hidden md:block" : ""
         }"><a class="flex flex-row gap-1 md:py-1 md:px-2 py-6 w-full justify-center items-center font-bold" href="${linkTitle.toLowerCase()}">
@@ -230,9 +242,13 @@ async function mainCatalogo(
     <div class="flex flex-col md:flex-row m-2 md:ml-2 md:mr-5 gap-5">
         <!-- Sidebar con i filtri di ricerca -->
         <aside class="border-gray-400 border-1 md:border-0 rounded-md px-2 py-1 md:w-7/24">
-            <h2 class="font-semibold text-center md:text-lg">Filtri</h2>
-            <!-- flex / hidden in versione mobile -->
-            <form action="filtra" class="px-2 py-1 flex flex-col gap-5">
+            <div class="flex flex-row items-center justify-center gap-3">
+                <h2 class="font-semibold text-center md:text-lg">Filtri</h2>
+                <img src="assets/icons/down-arrow.png" alt="Apri/chiudi filti"
+                class="w-4 h-4 md:hidden transition duration-300" />
+            </div>
+            <!-- flex / hidden (hidden in versione mobile) -->
+            <form action="filtra" class="px-2 py-1 hidden md:flex flex-col gap-5 animate-open">
                 <fieldset class="border border-solid border-gray-400 p-3 rounded-sm">
                     <legend class="font-medium">Prezzo</legend>
                     <ul class="flex flex-col gap-2">

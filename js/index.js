@@ -66,6 +66,27 @@ document.body.addEventListener('click', async function(e) {
         return;
     }
 
+    /* filter box in catalogo can be opened/closed if
+    the viewport matches a mobile device (Tailwind uses 768px
+    for the "md" breakpoint, matching devices larger than tablets */
+    if (e.target.closest("div aside div")
+    && document.documentElement.clientWidth < 768) {
+        const filterForm = document.querySelector("form");
+        const arrowIcon = document.querySelector("div aside div img");
+        // opens the filter menu
+        if (filterForm.classList.contains("hidden")) {
+            filterForm.classList.remove("hidden");
+            filterForm.classList.add("flex");
+            arrowIcon.classList.add("rotate-180");
+        // closes the filter menu
+        } else {
+            filterForm.classList.remove("flex");
+            filterForm.classList.add("hidden");
+            arrowIcon.classList.remove("rotate-180");
+        }
+        return;
+    }
+
     /* closest ensures that the click occurred anywhere inside
     the target element or is the target element itself */
     const link = e.target.closest("a");
@@ -91,6 +112,7 @@ document.body.addEventListener('click', async function(e) {
                     `${CATALOGO_CONSTANTS.defaultFilterOptions}&categories=${categoryID}`,
                 );
             });
+            await fillNavigation("catalogo");
         // Jumps into the catalogo at the specified products page
         } else if (hrefValue.match(/^productPage#([0-9])+$/)) {
             const pageNumber = Number(hrefValue.match(/^productPage#([0-9])+$/)[1]);
@@ -107,6 +129,7 @@ document.body.addEventListener('click', async function(e) {
         // Execute the main filler function associated with the link href value
         } else {
             await fillMain(HREF_TO_MAINFUNCTION[hrefValue]);
+            await fillNavigation(hrefValue);
         }
         return;
     }
@@ -140,4 +163,4 @@ document.body.addEventListener('click', async function(e) {
 });
 
 fillMain(mainVetrina);
-fillNavigation();
+fillNavigation("vetrina");
