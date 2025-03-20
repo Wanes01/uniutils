@@ -54,11 +54,11 @@ async function mainVetrina() {
                 (!userInfo.loggedIn || userInfo.user.isCustomer)
                     ? `Per te un vasto assortimento per studenti e
                 docenti, con articoli che vanno dall'
-                <a href="#" class="bg-ured p-1 rounded-md underline">hardware</a>
+                <a href="catalogo#1" class="bg-ured p-1 rounded-md underline">hardware</a>
                 avanzato agli strumenti di
-                <a href="#" class="bg-uorange p-1 rounded-md underline">cancelleria</a>,
+                <a href="catalogo#5" class="bg-uorange p-1 rounded-md underline">cancelleria</a>,
                 fino ai migliori
-                <a href="#" class="bg-uyellow p-1 rounded-md underline">prodotti</a>
+                <a href="catalogo" class="bg-uyellow p-1 rounded-md underline">prodotti</a>
                 per laboratori, progettazione e studio. Consegna rapida nel campus!`
                     : `Gestisci i prodotti in vendita nel
                 <a href="catalogo" class="bg-ured p-1 rounded-md underline">catalogo</a>
@@ -214,12 +214,17 @@ function mainRegister() {
         </div>`;
 }
 
-async function mainCatalogo() {
-    const SHOWN_PRODUCTS = 9;
+async function mainCatalogo(uriParams, productsPerPage, page) {
+    /*
+    Da passare:
+    - query formata dal form
+    - numero di pagina
+    - numero di prodotti per pagina
+    */
     return `
         <!-- Div per lo stile del page flow -->
     <h1 class="text-center text-xl font-bold mb-5">Prodotti del catalogo</h1>
-    <div class="flex flex-col md:flex-row m-2 gap-5">
+    <div class="flex flex-col md:flex-row m-2 md:ml-2 md:mr-5 gap-5">
         <!-- Sidebar con i filtri di ricerca -->
         <aside class="border-gray-400 border-1 md:border-0 rounded-md px-2 py-1 md:w-7/24">
             <h2 class="font-semibold text-center md:text-lg">Filtri</h2>
@@ -231,18 +236,31 @@ async function mainCatalogo() {
                         <li class="flex flex-row gap-1">
                             <label for="minPrice">Minimo</label>
                             <input type="number" name="minPrice" id="minPrice" min="0.01" step=".01"
+                                ${(() => {
+                                    // regular expression to check if minPrice is used or not
+                                    const regex = /minPrice=([^&]*)(?:&|$)/;
+                                    const match = uriParams.match(regex);
+                                    return match && match[1] ? `value="${match[1]}"` : "";
+                                })()}"
                                 class="border-black border-1 rounded-sm w-24 px-1
                                 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none">
                         </li>
                         <li class="flex flex-row gap-1">
                             <label for="maxPrice">Massimo</label>
                             <input type="number" name="maxPrice" id="maxPrice" min="0.01" step=".01"
+                                ${(() => {
+                                    // regular expression to check if maxPrice is used or not
+                                    const regex = /maxPrice=([^&]*)(?:&|$)/;
+                                    const match = uriParams.match(regex);
+                                    return match && match[1] ? `value="${match[1]}"` : "";
+                                })()}
                                 class="border-black border-1 rounded-sm w-24 px-1
                                 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none">
                         </li>
                         <li class="flex flex-row gap-1">
                             <label for="onlyOffers">Mostra solo offerte</label>
-                            <input type="checkbox" name="onlyOffers" id="onlyOffers" class="w-4 accent-ured">
+                            <input type="checkbox" name="onlyOffers" id="onlyOffers" class="w-4 accent-ured"
+                            ${uriParams.includes("onlyOffers") ? `checked="true"` : ""}>
                         </li>
                     </ul>
                 </fieldset>
@@ -250,13 +268,24 @@ async function mainCatalogo() {
                     <legend class="font-medium">Categorie</legend>
                     <ul class="flex flex-col gap-2">
                         ${await (async () => {
+                            // the previously used categories id
+                            let previewsCategories = [];
+                            const match = uriParams.match(/categories=([^&]+)(?:&|$)/);
+                            if (match && match[1]) {
+                                /*
+                                The URI builder separates categories by putting "," between them,
+                                encoded as "%2C"
+                                */
+                                previewsCategories = match[1].split("%2C");
+                            } 
                             let categories = "";
                             const categoriesData = await apiCaller("categories-info.php");
                             categoriesData.forEach(category => {
                                 categories +=
                                 `
                                 <li class="flex flex-row gap-2">
-                                    <input type="checkbox" name="${category.id}" id="category${category.id}" class="w-4 accent-ured">
+                                    <input type="checkbox" name="${category.id}" id="category${category.id}" class="w-4 accent-ured"
+                                     ${previewsCategories.includes((category.id).toString()) ? `checked="true"` : ""}>
                                     <label for="category${category.id}">${category.name}</label>
                                 </li>
                                 `
@@ -269,22 +298,26 @@ async function mainCatalogo() {
                     <legend class="font-medium">Ordina per</legend>
                     <ul class="flex flex-col gap-y-2">
                         <li>
-                            <input type="radio" name="orderBy" id="popularity" value="popularity" checked="checked"
-                                class="w-4 accent-ured">
+                            <input type="radio" name="orderBy" id="popularity" value="popularity"
+                            ${uriParams.includes("orderBy=popularity") ? `checked="true"` : ""}
+                            class="w-4 accent-ured">
                             <label for="popularity">Popolaritá</label>
                         </li>
                         <li>
                             <input type="radio" name="orderBy" id="decreasingPrice" value="decreasingPrice"
+                            ${uriParams.includes("orderBy=decreasingPrice") ? `checked="true"` : ""}
                             class="w-4 accent-ured">
                             <label for="decreasingPrice">Prezzo decrescente</label>
                         </li>
                         <li>
                             <input type="radio" name="orderBy" id="increasingPrice" value="increasingPrice"
+                            ${uriParams.includes("orderBy=increasingPrice") ? `checked="true"` : ""}
                             class="w-4 accent-ured">
                             <label for="increasingPrice">Prezzo crescente</label>
                         </li>
                         <li>
                             <input type="radio" name="orderBy" id="random" value="random"
+                            ${uriParams.includes("orderBy=random") ? `checked="true"` : ""}
                             class="w-4 accent-ured">
                             <label for="random">Casuale</label>
                         </li>
@@ -297,12 +330,16 @@ async function mainCatalogo() {
             </form>
         </aside>
         <!-- Sezione ricerca a visualizzazione multipagina prodotti -->
-        <section class="w-full">
+        <section class="w-full flex flex-col gap-5">
             <header>
-                <form action="" class="flex flex-col md:flex-row md:items-center md:gap-2">
-                    <label for="productSearch">Cerca in base a nome/descrizione </label>
+                <form action="cerca" class="flex flex-col md:flex-row md:items-center md:gap-2">
+                    <label for="search">Cerca in base a nome/descrizione </label>
                     <div class="flex flex-row flex-1">
-                        <input type="search" name="productSearch" id=" productSearch"
+                        <input type="search" name="search" id="search" autocomplete="off"
+                            ${(() => {
+                                const match = uriParams.match(/search=([^&]+)(?:&|$)/);
+                                return match && match[1] ? `value="${match[1]}"` : "";
+                            })()}
                             class="w-full rounded-l-full px-3 py-1 border-1 border-r-0 border-gray-400"
                             placeholder="Nome prodotto / descrizione prodotto" />
                         <input type="submit" value="Cerca" class="cursor-pointer rounded-r-full px-4 py-1 border-1 border-l-0 border-gray-400
@@ -310,19 +347,33 @@ async function mainCatalogo() {
                     </div>
                 </form>
             </header>
-            <div class="flex flex-col gap-3 py-5 md:grid md:grid-cols-3">
+            <div class="flex flex-col gap-3 py-5 md:grid md:grid-cols-4">
             ${await (async () => {
                 let previews = "";
-                const productData = await apiCaller(
-                    "filtered-products.php?minPrice=&maxPrice=&orderBy=popularity&from=0&howMany=9"
-                );
+                const productData = await apiCaller(`filtered-products.php?${uriParams}`);
                 generateProductPreview(productData, "", "h2").forEach(article => previews += article);
                 return previews;
             })()}
             </div>
             <!-- Multipagina -->
             <footer>
-
+                <ul class="flex flex-row justify-center gap-4">
+                ${await (async () => {
+                    const totalProducts = (await apiCaller(
+                        `filtered-products.php?${uriParams}&count=`
+                    ))[0].count;
+                    const totalPages = Math.ceil(totalProducts / productsPerPage);
+                    let numbers = "";
+                    for (let i = 1; i <= totalPages; i++) {
+                        // bg-ublue text-white
+                        numbers += `
+                        <li>
+                            <a href="#" class="block bg-usky font-semibold text-xl py-2 px-3 rounded-sm">${i}</a>
+                        <li>`;
+                    }
+                    return numbers;
+                })()} 
+                </ul>
             </footer>
         </section>
     </div>`;

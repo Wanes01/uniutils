@@ -21,13 +21,21 @@ if (isset($_GET["categories"])) {
     $filterOptions["categories"] = explode(",", $_GET["categories"]);
 }
 
-// error_log(var_export($filterOptions, true));
-$products = $dbh->filterProducts($filterOptions);
+// error_log(var_export($dbh->countTotalFilteredProducts($filterOptions), true));
 
-// converts the image name to the image full path
-for($i = 0; $i < count($products); $i++){
-    $products[$i]["image_name"] = PROD_DIR.$products[$i]["image_name"];
+// retrivies the products info from the database with the specified filters
+if (!isset($_GET["count"])) {
+    $products = $dbh->filterProducts($filterOptions);
+
+    // converts the image name to the image full path
+    for($i = 0; $i < count($products); $i++){
+        $products[$i]["image_name"] = PROD_DIR.$products[$i]["image_name"];
+    }
+// retrieves the total amount of products that match the specified filters
+} else {
+    $products = $dbh->countTotalFilteredProducts($filterOptions);
 }
+
 header('Content-Type: application/json');
 echo json_encode($products);
 ?>

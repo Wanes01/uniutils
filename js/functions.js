@@ -126,10 +126,7 @@ function capitalizeFirstLetter(word) {
 }
 
 // the filters do not consider the search query 
-async function productFilterSubmitter(formData, productsPerPage, page) {
-    productsPerPage = 9;
-    page = 0;
-
+function productsURIParmsBuilder(formData, productsPerPage, page) {
     const minPrice = Number(formData.get("minPrice"));
     const maxPrice = Number(formData.get("maxPrice"));
 
@@ -150,7 +147,7 @@ async function productFilterSubmitter(formData, productsPerPage, page) {
         minPrice: formData.get("minPrice"),
         maxPrice: formData.get("maxPrice"),
         orderBy: formData.get("orderBy"),
-        from: (page * productsPerPage),
+        from: ((page - 1) * productsPerPage),
         howMany: productsPerPage
     };
 
@@ -158,12 +155,21 @@ async function productFilterSubmitter(formData, productsPerPage, page) {
     if (formData.has("onlyOffers")) {
         fields.onlyOffers = ""; // this value has no special meaning, onlyOffers just has to be in the object
     }
+    if (formData.has("search")) {
+        fields.search = formData.get("search");
+    }
     if (categories.length > 0) {
         fields.categories = categories;
     }
 
-    const params = new URLSearchParams(fields);
+    return new URLSearchParams(fields).toString();
+}
 
-    const articlesData = await apiCaller(`filtered-products.php?${params.toString()}`);
-    console.log(articlesData);
+async function productFilterSubmitter(filtersData, searchData) {
+    filtersData.append("search", searchData.get("search"));
+    const uriParams = productsURIParmsBuilder(filtersData, 8, 1);
+    //console.log(uriParams);
+    await fillMain(async () => {
+        return await mainCatalogo(uriParams, 8, 1);
+    });
 }

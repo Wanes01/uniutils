@@ -99,8 +99,7 @@ class DatabaseHelper {
     }
 
     public function filterProducts($options) {
-
-        $query = "SELECT p.id, p.title, p.description, p.price, p.discount_price, p.image_name, 
+        $query = "SELECT DISTINCT p.id, p.title, p.description, p.price, p.discount_price, p.image_name, 
         p.sold_count, p.quantity_available FROM products p";
         // Categories selected. Inner joins to access categories data
         if (isset($options["categories"])) {
@@ -140,7 +139,7 @@ class DatabaseHelper {
         $query .= " LIMIT ?, ?";
 
         // LOGS
-        error_log(var_export($query, true));
+        // error_log(var_export($query, true));
 
         // Puts parameters in the correct order and format
         $pType = "dd";
@@ -160,6 +159,52 @@ class DatabaseHelper {
         $pType .= "ii";
         array_push($params, $options["from"]);
         array_push($params, $options["howMany"]);
+
+        // query execution
+        $stmt = $this->db->prepare($query);
+        $stmt->bind_param($pType, ...$params);
+        $stmt->execute();
+        $result = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+
+        return $result;
+    }
+
+    public function countTotalFilteredProducts($options) {
+        $query = "SELECT DISTINCT COUNT(*) as count FROM products p";
+        // Categories selected. Inner joins to access categories data
+        if (isset($options["categories"])) {
+            $query .= " JOIN product_categories pc ON p.id = pc.product_id";
+        }
+        $query .= " WHERE p.price BETWEEN ? AND ?";
+
+        if (isset($options["onlyOffers"])) {
+            $query .= " AND p.discount_price IS NOT NULL";
+        }
+
+        if (isset($options["categories"])) {
+            // adds a "?" inside brackets for each category
+            $query .= " AND pc.category_id IN (" . implode(',', array_fill(0, count($options["categories"]), '?')) . ")";
+        }
+
+        // search box not empty
+        if (isset($options["search"])) {
+            $query .= " AND (p.title LIKE ? OR p.description LIKE ?)";
+        }
+
+        // Puts parameters in the correct order and format
+        $pType = "dd";
+        $params = array($options["minPrice"], $options["maxPrice"]);
+
+        if (isset($options["categories"])) {
+            $pType .= str_repeat("i", count($options["categories"]));
+            $params = array_merge($params, $options["categories"]);
+        }
+
+        if (isset($options["search"])) {
+            $pType .= "ss";
+            array_push($params, "%" . $options["search"] . "%");
+            array_push($params, "%" . $options["search"] . "%");
+        }
 
         // query execution
         $stmt = $this->db->prepare($query);
