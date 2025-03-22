@@ -129,7 +129,7 @@ function validateProductData(
     if (count($newCategories) > 30) {
         array_push($errors, "Aggiunte troppe categorie.");
     }
-    if ($newCategories[0] == "" && $existingCategoriesIds[0] == "") {
+    if (count($newCategories) == 0 && count($existingCategoriesIds) == 0) {
         array_push($errors, "Un prodotto deve avere almeno una categoria associata.");
     }
     if ($discountPrice != "" && ((float)$discountPrice >= (float)$price)) {
@@ -147,7 +147,7 @@ function validateProductData(
     }
 
     foreach ($newCategories as $newCatName) {
-        if (in_array(ucfirst($newCatName), $catNames)) {
+        if (in_array($newCatName, $catNames)) {
             array_push($errors, "Categorie giá esistenti non possono essere inserite come nuove.");
             break;
         }

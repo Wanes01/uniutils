@@ -122,8 +122,8 @@ document.body.addEventListener('click', async function(e) {
         }
 
         // Jumps into the catalogo with a category already selected
-        if (hrefValue.match(/^catalogo#([0-9])+$/)) {
-            const categoryID = hrefValue.match(/^catalogo#([0-9])+$/)[1];
+        if (hrefValue.match(/^catalogo#([0-9]+)$/)) {
+            const categoryID = hrefValue.match(/^catalogo#([0-9]+)$/)[1];
             await fillMain(async () => {
                 return await HREF_TO_MAINFUNCTION["catalogo"](
                     `${CATALOGO_CONSTANTS.defaultFilterOptions}&categories=${categoryID}`,
@@ -131,8 +131,8 @@ document.body.addEventListener('click', async function(e) {
             });
             await fillNavigation("catalogo");
         // Jumps into the catalogo at the specified products page
-        } else if (hrefValue.match(/^productPage#([0-9])+$/)) {
-            const pageNumber = Number(hrefValue.match(/^productPage#([0-9])+$/)[1]);
+        } else if (hrefValue.match(/^productPage#([0-9]+)$/)) {
+            const pageNumber = Number(hrefValue.match(/^productPage#([0-9]+)$/)[1]);
             // user may be changing product page AFTER applying filters
             const [filters, searchBar] = document.querySelectorAll("form");
             await ACTION_TO_FORMSUBMITTER["filtra"](
@@ -140,6 +140,13 @@ document.body.addEventListener('click', async function(e) {
                 new FormData(searchBar),
                 pageNumber
             );
+        // User wants to update the product informations
+        } else if (hrefValue.match(/^updateProduct#([0-9]+)$/)) {
+            const productID = Number(hrefValue.match(/^updateProduct#([0-9]+)$/)[1]);
+            console.log(productID);
+            await fillMain(async () => {
+                return await HREF_TO_MAINFUNCTION["CRUDProduct"](productID);
+            });
         // Logs out the user
         } else if (hrefValue == "logout") {
             await logoutUser();

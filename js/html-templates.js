@@ -11,11 +11,11 @@ function generateProductPreview(productData, wClass, heading) {
             <header class="flex items-center justify-center basis-1/3">
                 <img class="w-auto md:max-h-40" src="${productData[i].image_name}" alt="${productData[i].title}" />
             </header>
-            <div class="flex flex-col w-full h-full">
+            <div class="flex flex-col w-full grow">
                 <section>
                     <${heading} class="font-bold">${productData[i].title}</${heading}>
-                    <p class="font-semibold">€${productData[i].price} <del class="text-red-800">${
-                        productData[i].discount_price != null ? "€" + productData[i].discount_price : ""
+                    <p class="font-semibold">€${productData[i].discount_price ? productData[i].discount_price : productData[i].price} <del class="text-red-800">${
+                        productData[i].discount_price != null ? "€" + productData[i].price : ""
                     }</del>${
                         productData[i].discount_price != null
                             ? " (-" + computeDiscount(productData[i].price, productData[i].discount_price) + "%)"
@@ -27,12 +27,31 @@ function generateProductPreview(productData, wClass, heading) {
                             : productData[i].description.substring(0, DESCRIPTION_MAX_CHARS) + "..."
                     }</p>
                 </section>
-                <footer class="flex flex-col flex-1 justify-end">
-                    <a class="flex items-center justify-center gap-2 border-black border-1 w-full py-1 mt-2 rounded-full"
-                        href="#">
-                        <img class="w-5 h-5 aspect-square" src="assets/icons/info.png" alt="">
-                        Scheda prodotto
-                    </a>
+                <footer class="flex-1 flex flex-col justify-end">
+                    <ul class="flex flex-col justify-end">
+                        <li>
+                            <a class="flex items-center justify-center gap-2 border-black border-1 w-full py-1 mt-2 rounded-full active:inset-shadow-sm active:inset-shadow-gray-800"
+                                href="showProduct#${productData[i].id}">
+                                <img class="w-5 h-5 aspect-square" src="assets/icons/info.png" alt="">
+                                Scheda prodotto
+                            </a>
+                        </li>
+                        ${(() => {
+                            // UPDATE BUTTON. Only the vendor can see it
+                            if (USER_INFO.loggedIn && !USER_INFO.user.isCustomer) {
+                                return `
+                                <li>
+                                    <a class="flex items-center justify-center gap-2 border-black border-1 w-full py-1 mt-2 rounded-full
+                                    active:inset-shadow-sm active:inset-shadow-gray-800 bg-ulorange"
+                                        href="updateProduct#${productData[i].id}">
+                                        <img class="w-5 h-5 aspect-square" src="assets/icons/edit.png" alt="">
+                                        Modifica prodotto
+                                    </a>
+                                </li>`;
+                            }
+                            return "";
+                        })()}
+                    </ul>
                 </footer>
             </div>
         </article>`);
@@ -365,7 +384,7 @@ async function mainCatalogo(
                     if (USER_INFO.loggedIn && !USER_INFO.user.isCustomer) {
                         return `
                         <a href="CRUDProduct" class="flex flex-row justify-center items-center gap-2
-                        font-semibold bg-ugreen py-2 md:px-3 rounded-full text-center">
+                        font-semibold bg-ugreen py-2 md:px-3 rounded-full text-center active:inset-shadow-sm active:inset-shadow-gray-800">
                             Aggiungi prodotto
                             <img src="assets/icons/add.png" class="w-4 h-4">
                         </a>
@@ -423,12 +442,19 @@ async function showDisappearingInfoModal(message, time) {
     //div.classList.remove("blur-sm");
 }
 
-async function mainCRUDProduct() {
+async function mainCRUDProduct(productID = null) {
+    // data used to fill the form for product update
+    const productData = productID
+        ? await apiCaller(`product-by-id.php?id=${productID}`)
+        : null;
+    console.log(productData);
     return `
             <div class="px-2 py-3 flex flex-col justify-center items-center gap-3">
-            <h1 class="font-bold text-xl">Aggiungi prodotto</h1>
             <section>
                 <form action="CRUDproduct" class="flex flex-col w-full p-3 gap-4 rounded-md">
+                    <header class="text-center">
+                        <h1 class="font-bold text-xl">${productData && productData.success ? "Modifica prodotto" : "Aggiungi prodotto"}</h1>
+                    </header>
                     <fieldset class="border-1 border-gray-400 p-3 rounded-md">
                         <legend class="font-medium">Criteri di ricerca</legend>
                         <ul class="flex flex-col gap-3">
@@ -438,6 +464,11 @@ async function mainCRUDProduct() {
                                     <img src="assets/icons/required.png" alt="campo obbligatorio" class="w-4 h-4">
                                 </div>
                                 <input type="text" name="title" id="title" required autocomplete="off" maxlength="255"
+                                    ${(() => {
+                                        return productData && productData.success
+                                            ? `value="${productData.product.title}"`
+                                            : ""
+                                    })()}
                                     class="border-1 border-black p-1 rounded-sm focus:outline-2 focus:outline-sky-700 focus:bg-sky-50 w-full" />
                             </li>
                             <li>
@@ -446,7 +477,12 @@ async function mainCRUDProduct() {
                                     <img src="assets/icons/required.png" alt="campo obbligatorio" class="w-4 h-4">
                                 </div>
                                 <textarea name="description" id="description" required autocomplete="off" maxlength="10000"
-                                    class="border-1 border-black p-1 rounded-sm focus:outline-2 focus:outline-sky-700 focus:bg-sky-50 resize-none h-100 overscroll-y-contain w-full"></textarea>
+                                    class="border-1 border-black p-1 rounded-sm focus:outline-2 focus:outline-sky-700 focus:bg-sky-50 resize-none h-100 overscroll-y-contain w-full"
+                                    >${(() => {
+                                        return productData && productData.success
+                                            ? productData.product.description
+                                            : ""
+                                    })()}</textarea>
                             </li>
                         </ul>
                     </fieldset>
@@ -458,15 +494,23 @@ async function mainCRUDProduct() {
                                     <label for="price">Prezzo intero in €</label>
                                     <img src="assets/icons/required.png" alt="campo obbligatorio" class="w-4 h-4">
                                 </div>
-                                <input type="number" name="price" id="price" required autocomplete="off" min="0.01" max="99999999.99"
-                                    step=".01"
+                                <input type="number" name="price" id="price" required autocomplete="off" min="0.01" max="99999999.99" step=".01" 
+                                    ${(() => {
+                                        return productData && productData.success
+                                            ? `value="${productData.product.price}"`
+                                            : ""
+                                    })()}
                                     class="border-1 border-black p-1 rounded-sm focus:outline-2 focus:outline-sky-700 focus:bg-sky-50 w-full
                                     [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" />
                             </li>
                             <li>
                                 <label for="discountPrice">Prezzo scontato in €</label>
-                                <input type="number" name="discountPrice" id="discountPrice" autocomplete="off"
-                                    min="0.01" step=".01" max="99999999.99"
+                                <input type="number" name="discountPrice" id="discountPrice" autocomplete="off" min="0.01" step=".01" max="99999999.99" 
+                                    ${(() => {
+                                        return productData && productData.success && productData.product.discount_price
+                                            ? `value="${productData.product.discount_price}"`
+                                            : ""
+                                    })()}
                                     class="border-1 border-black p-1 rounded-sm focus:outline-2 focus:outline-sky-700 focus:bg-sky-50 w-full
                                     [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" />
                             </li>
@@ -489,7 +533,10 @@ async function mainCRUDProduct() {
                                 categories +=
                                 `
                                 <li class="flex flex-row gap-2">
-                                    <input type="checkbox" name="${category.id}" id="category${category.id}" class="w-4 accent-ured" />
+                                    <input type="checkbox" name="${category.id}" id="category${category.id}" 
+                                    ${productData && productData.success && (productData.product.category_ids).includes(category.id.toString())
+                                        ? 'checked="true"'
+                                        : ""} class="w-4 accent-ured" />
                                     <label for="category${category.id}">${category.name}</label>
                                 </li>
                                 `
@@ -508,17 +555,30 @@ async function mainCRUDProduct() {
                                     <label for="quantity">Quantitá</label>
                                     <img src="assets/icons/required.png" alt="campo obbligatorio" class="w-4 h-4">
                                 </div>
-                                <input type="number" name="quantity" id="quantity" required autocomplete="off" min="1" max="99999999"
-                                    step="1"
+                                <input type="number" name="quantity" id="quantity" required autocomplete="off" min="1" max="99999999" step="1" 
+                                    ${(() => {
+                                        return productData && productData.success
+                                            ? `value="${productData.product.quantity_available}"`
+                                            : ""
+                                    })()}
                                     class="border-1 border-black p-1 rounded-sm focus:outline-2 focus:outline-sky-700 focus:bg-sky-50 w-full
                                     [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" />
                             </li>
                             <li>
                                 <div class="flex flex-row items-center gap-2">
-                                    <label for="image">Immagine</label>
-                                    <img src="assets/icons/required.png" alt="campo obbligatorio" class="w-4 h-4">
+                                    <label for="image">${productData && productData.success ? "Cambia immagine" : "Immagine"}</label>
+                                    ${(() => {
+                                        // the image is optional on update
+                                        return productData && productData.success
+                                            ? ""
+                                            : `<img src="assets/icons/required.png" alt="campo obbligatorio" class="w-4 h-4" />`
+                                    })()}
                                 </div>
-                                <input type="file" name="image" id="image" required autocomplete="off" maxlength="255"
+                                <input type="file" name="image" id="image" ${
+                                    productData && productData.success
+                                        ? ""
+                                        : "required"
+                                    } autocomplete="off" maxlength="255" 
                                     class="border-1 border-black p-1 rounded-sm focus:outline-2 focus:outline-sky-700 focus:bg-sky-50 w-full"
                                     accept=".jpg, .jpeg, .png" />
                             </li>
@@ -530,8 +590,10 @@ async function mainCRUDProduct() {
                     </div>
                     <ul class="hidden list-disc list-inside mt-6 text-red-700 text-clip md:col-span-2">
                     </ul>
-                    <input type="submit" value="Aggiungi prodotto" name="addProduct"
-                        class="cursor-pointer active:inset-shadow-sm active:inset-shadow-gray-800 font-semibold bg-ugreen py-2 md:px-3 rounded-full border-1 border-black mt-3" />
+                    <footer>
+                        <input type="submit" value="Aggiungi prodotto" name="addProduct"
+                            class="cursor-pointer active:inset-shadow-sm active:inset-shadow-gray-800 font-semibold bg-ugreen py-2 md:px-3 rounded-full border-1 border-black mt-3" />
+                    </footer>
                 </form>
             </section>
         </div>

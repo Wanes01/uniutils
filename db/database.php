@@ -9,6 +9,7 @@ class DatabaseHelper {
         }        
     }
 
+    /*
     public function getRandomDiscountedProducts($n=-1)
     {
         $query = "SELECT id, title, description, price, discount_price, image_name
@@ -46,7 +47,7 @@ class DatabaseHelper {
         $result = $stmt->get_result();
 
         return $result->fetch_all(MYSQLI_ASSOC);
-    }
+    }*/
 
     // returns true if the username is unique
     public function checkUsernameAvailability($username)
@@ -138,9 +139,6 @@ class DatabaseHelper {
 
         $query .= " LIMIT ?, ?";
 
-        // LOGS
-        // error_log(var_export($query, true));
-
         // Puts parameters in the correct order and format
         $pType = "dd";
         $params = array($options["minPrice"], $options["maxPrice"]);
@@ -212,6 +210,91 @@ class DatabaseHelper {
         $stmt->execute();
         $result = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 
+        return $result;
+    }
+
+    public function addProduct(
+        $title,
+        $description,
+        $price,
+        $discountPrice,
+        $categoriesIds,
+        $quantity,
+        $imageName
+    ) {
+        $query = "INSERT INTO products (title, description, quantity_available, price, discount_price, image_name) 
+        VALUES (?, ?, ?, ?, ?, ?)";
+        $stmt = $this->db->prepare($query);
+        $stmt->bind_param("ssidds",
+            $title,
+            $description,
+            $quantity,
+            $price,
+            $discountPrice,
+            $imageName
+        );
+        $stmt->execute();
+
+        // the id of the product:
+        $productId = $this->db->insert_id;
+
+
+        // associates the product with all the categories
+        $query = "INSERT INTO product_categories (product_id, category_id) VALUES";
+        for ($i = 0; $i < count($categoriesIds); $i++) {
+            $query .= " (" . $productId . ", ?)" . ($i < count($categoriesIds) - 1 ? "," : "");
+        }
+
+        $pType = str_repeat("i", count($categoriesIds));
+        $stmt = $this->db->prepare($query);
+        $stmt->bind_param($pType, ...$categoriesIds);
+        $stmt->execute();
+    }
+
+    /* adds all the category names in the array $categories to the database
+    and returns the ids of the newly created categories */
+    public function addCategoriesAndGetIds($categories) {
+        $query = "INSERT INTO categories (name) VALUES";
+
+        for ($i = 0; $i < count($categories); $i++) {
+            $query .= " (?)" . ($i < count($categories) - 1 ? "," : "");
+        }
+ 
+        $pType = str_repeat("s", count($categories));
+        $stmt = $this->db->prepare($query);
+        $stmt->bind_param($pType, ...$categories);
+        $stmt->execute();
+
+        // Return the new categories ids
+        $query = "SELECT id, name FROM categories WHERE name IN ("
+        . implode(",", array_fill(0, count($categories), "?")). ")";
+
+        $stmt = $this->db->prepare($query);
+        $stmt->bind_param($pType, ...$categories);
+        $stmt->execute();
+        $result = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+
+        $newIds = array();
+        foreach ($result as $category) {
+            array_push($newIds, $category["id"]);
+        }
+
+        return $newIds;
+    }
+
+    public function getProductByID($id) {
+        $query = "SELECT p.id, p.title, p.description, p.quantity_available, p.sold_count, p.price, p.discount_price, p.image_name, 
+        GROUP_CONCAT(c.id ORDER BY c.id SEPARATOR ', ') AS category_ids
+        FROM products p
+        LEFT JOIN product_categories pc ON p.id = pc.product_id
+        LEFT JOIN categories c ON pc.category_id = c.id
+        WHERE p.id = ?
+        GROUP BY p.id";
+        
+        $stmt = $this->db->prepare($query);
+        $stmt->bind_param("i", $id);
+        $stmt->execute();
+        $result = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         return $result;
     }
 }

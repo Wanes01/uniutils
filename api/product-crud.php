@@ -17,8 +17,20 @@ if ($action == "deleteProduct") {
 }
 
 // User added or updated a product, input fields must be checked
-$existingCategoriesIds = explode(",", $_POST["existingCategories"]);
-$newCategories = explode(",", $_POST["newCategories"]);
+
+$existingCategoriesIds = array();
+if ($_POST["existingCategories"] !== "") {
+    $existingCategoriesIds = explode(",", $_POST["existingCategories"]);
+}
+$newCategories = array();
+if ($_POST["newCategories"] !== "") {
+    foreach (explode(",", $_POST["newCategories"]) as $newCat) {
+        // makes the new categories first letter uppercase
+        array_push($newCategories, ucfirst($newCat));
+    }
+}
+
+$image = $_FILES['image'];
 
 $errors = validateProductData(
     $_POST["title"],
@@ -29,11 +41,42 @@ $errors = validateProductData(
     $existingCategoriesIds,
     $_POST["quantity"],
     $dbh,
-    $_FILES['image']
+    $image
 );
 
-error_log(var_export($errors, true));
-
+// if errors occured product can't be added / updated
 header('Content-Type: application/json');
+if (count($errors) !== 0) {
+    echo json_encode($errors);
+    return;
+}
+
+/* Product data was valid, new category names too */
+$newCategoriesIds = count($newCategories) != 0
+    ? $dbh->addCategoriesAndGetIds($newCategories)
+    : array();
+
+$allCategoriesIds = array_merge($existingCategoriesIds, $newCategoriesIds);
+
+if ($action == "addProduct") {
+    // moves the image to the product images directory 
+    $uniqueImageName = time() . "_" . $image["name"];
+    $destination = PROD_DIR_API . $uniqueImageName;
+
+    // error_log(var_export(array($destination, $image["tmp_name"]), true));
+    move_uploaded_file($image["tmp_name"], $destination);
+
+    // adds the product
+    $dbh->addProduct(
+        $_POST["title"],
+        $_POST["description"],
+        $_POST["price"],
+        $_POST["discountPrice"] == "" ? null : $_POST["discountPrice"],
+        $allCategoriesIds,
+        $_POST["quantity"],
+        $uniqueImageName // multiple images may share the same name. Adds the timestamp to make the name unique
+    );
+}
+
 echo json_encode($errors);
 ?>
