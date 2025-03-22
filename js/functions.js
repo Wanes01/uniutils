@@ -45,7 +45,7 @@ async function fillMain(mainFunction) {
 
 async function fillNavigation(active) {
     const linkList = document.querySelector("body > header > nav:last-of-type > ul");
-    const links =  (await getUserInfo()).navigation;
+    const links = USER_INFO.navigation;
     linkList.innerHTML = "";
     links.forEach(link => {
         linkList.innerHTML += generateNavItem(link, active);
@@ -102,6 +102,7 @@ async function loginSubmitter(formData, errorList) {
         errorList.appendChild(errLine);
         return;
     }
+    USER_INFO = await getUserInfo();
     // The registration was successfull. Redirects the user to the login
     await showDisappearingInfoModal(
         "Login avvenuto con successo. Stai per essere rediretto alla Vetrina ✅", 2500
@@ -116,6 +117,7 @@ and resets the interface if succesfull */
 async function logoutUser() {
     const response = await apiCaller("logout.php");
     if (response.success) {
+        USER_INFO = await getUserInfo();
         await showDisappearingInfoModal("Bye bye! 👋", 2500);
         await fillMain(mainVetrina);
         await fillNavigation("vetrina");
@@ -177,4 +179,42 @@ async function productFilterSubmitter(
     await fillMain(async () => {
         return await mainCatalogo(uriParams, page, productsPerPage);
     });
+}
+
+async function getExistingCategories() {
+    const categories = await apiCaller("categories-info.php");
+    return categories;
+}
+
+async function productCRUDSubmitter(formData, errorList, CRUDAction) {
+    // the article can be added, updated or deleted
+    const updatedFormData = new FormData();
+    const categories = []; // group categories id
+    formData.keys().forEach(key => {
+        if (/^[0-9]\d*$/.test(key)) {
+            categories.push(key);
+        } else if (key == "newCategories") {
+            /* splits new categories by all non digits/letters */
+            const newCategories = formData.get(key).match(/\w+/g);
+            updatedFormData.append(key, newCategories ? newCategories : "");
+        } else {
+            updatedFormData.append(key, formData.get(key));
+        }
+    });
+    
+    updatedFormData.append("existingCategories", categories);   
+    updatedFormData.append("CRUDAction", CRUDAction);
+
+    const errors = await apiCaller("product-crud.php", "POST", updatedFormData);
+    
+    if (errors.length > 0) {
+        errorList.classList.remove("hidden");
+        errorList.innerHTML = "";
+        errors.forEach(err => {
+            const errLine = document.createElement("li");
+            errLine.innerText = err;
+            errorList.appendChild(errLine);
+        });
+        return;
+    }
 }

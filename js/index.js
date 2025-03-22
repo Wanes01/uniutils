@@ -1,6 +1,41 @@
 "use strict";
 
 /*
+GLOBAL VARIABLES AND DECLARATIONS
+*/
+
+/* User information.
+Changes during login and logout */
+let USER_INFO = null;
+
+/* Associates the href value to the function used to fill the main */
+const HREF_TO_MAINFUNCTION = {
+    'vetrina' : mainVetrina,
+    'login' : mainLogin,
+    'registrazione' : mainRegister,
+    'catalogo' : mainCatalogo,
+    'CRUDProduct' : mainCRUDProduct,
+}
+
+/* Associates the form action to the function to call */
+const ACTION_TO_FORMSUBMITTER = {
+    'registrazione' : registerSubmitter,
+    'login' : loginSubmitter,
+    'filtra' : productFilterSubmitter,
+    'cerca' : productFilterSubmitter,
+    'CRUDproduct' : productCRUDSubmitter
+}
+
+/* How many products to display in catalogo and the default
+URI parameters to get the default catalogo products */
+const CATALOGO_CONSTANTS = {
+    productsPerPage : 8,
+    get defaultFilterOptions() {
+        return "minPrice=&maxPrice=&orderBy=popularity&from=0&howMany=" + this.productsPerPage;
+    }
+}
+
+/*
 POPUP HANDLERS
 */
 const popupMenuIcon = document.querySelector("body header nav img:last-child");
@@ -25,28 +60,6 @@ popupMenu.addEventListener('click', () => {
 /* 
 LINK HANDLERS 
 */
-
-/* Associates the href value to the function used to fill the main tag */
-const HREF_TO_MAINFUNCTION = {
-    'vetrina' : mainVetrina,
-    'login' : mainLogin,
-    'registrazione' : mainRegister,
-    'catalogo' : mainCatalogo,
-}
-
-const ACTION_TO_FORMSUBMITTER = {
-    'registrazione' : registerSubmitter,
-    'login' : loginSubmitter,
-    'filtra' : productFilterSubmitter,
-    'cerca' : productFilterSubmitter,
-}
-
-const CATALOGO_CONSTANTS = {
-    productsPerPage : 8,
-    get defaultFilterOptions() {
-        return "minPrice=&maxPrice=&orderBy=popularity&from=0&howMany=" + this.productsPerPage;
-    }
-}
 
 /* All links in the main are generated dynamically, which means that you cannot attach
 an event handler to them when the page loads. The function below performs an action by
@@ -73,6 +86,7 @@ document.body.addEventListener('click', async function(e) {
     && document.documentElement.clientWidth < 768) {
         const filterForm = document.querySelector("form");
         const arrowIcon = document.querySelector("div aside div img");
+        filterForm.classList.add("animate-open");
         // opens the filter menu
         if (filterForm.classList.contains("hidden")) {
             filterForm.classList.remove("hidden");
@@ -85,7 +99,10 @@ document.body.addEventListener('click', async function(e) {
             arrowIcon.classList.remove("rotate-180");
         }
         return;
-    }
+    } else if (e.target.closest("div aside div")
+        && document.documentElement.clientWidth >= 768) {
+            filterForm.classList.remove("animate-open");
+        }
 
     /* closest ensures that the click occurred anywhere inside
     the target element or is the target element itself */
@@ -147,9 +164,12 @@ document.body.addEventListener('click', async function(e) {
     switch (action) {
         case 'login':
         case 'registrazione':
-            // login and register form have a list to display input errors
-            const errorList = form.querySelector("ul:last-of-type")
-            await ACTION_TO_FORMSUBMITTER[action](new FormData(form), errorList);
+        case 'CRUDproduct':
+            // login, register and the crud product forms have a list to display input errors
+            const errorList = document.querySelector("form > ul:last-of-type");
+            await action != 'CRUDproduct'
+                ? ACTION_TO_FORMSUBMITTER[action](new FormData(form), errorList)
+                : ACTION_TO_FORMSUBMITTER[action](new FormData(form), errorList, submit.name);
             break;
         case 'filtra':
         case 'cerca':
@@ -159,8 +179,15 @@ document.body.addEventListener('click', async function(e) {
                 new FormData(filters),
                 new FormData(searchBar),
             );
+            break;
+        default:
+            await ACTION_TO_FORMSUBMITTER[action](new FormData(form));
     }
 });
 
-fillMain(mainVetrina);
-fillNavigation("vetrina");
+// FIRST THING TO EXECUTE ON PAGE LOAD
+(async () => {
+    USER_INFO = await getUserInfo();
+    await fillMain(mainVetrina);
+    await fillNavigation("vetrina");
+})();

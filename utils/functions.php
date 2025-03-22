@@ -100,4 +100,84 @@ function isUserLoggedIn() {
     return isset($_SESSION["userId"]);
 }
 
+function isUserCustomer() {
+    return $_SESSION["isCustomer"];
+}
+
+function validateProductData(
+    $title,
+    $description,
+    $price,
+    $discountPrice,
+    $newCategories,
+    $existingCategoriesIds,
+    $quantity,
+    $dbh,
+    $image = null
+) {
+    $errors = array();
+    
+    if (strlen($title) == 0 || strlen($description) == 0) {
+        array_push($errors, "Titolo e descrizione non possono essere vuoti.");
+    }
+    if (strlen($title) > 255) {
+        array_push($errors, "Titolo troppo lungo.");
+    }
+    if (strlen($description) > 10000) {
+        array_push($errors, "Descrizione troppo lunga.");
+    }
+    if (count($newCategories) > 30) {
+        array_push($errors, "Aggiunte troppe categorie.");
+    }
+    if ($newCategories[0] == "" && $existingCategoriesIds[0] == "") {
+        array_push($errors, "Un prodotto deve avere almeno una categoria associata.");
+    }
+    if ($discountPrice != "" && ((float)$discountPrice >= (float)$price)) {
+        array_push($errors, "Il prezzo scontato non puó essere maggiore o uguale al prezzo originale.");
+    }
+    if ((int)$quantity < 1) {
+        array_push($errors, "La quantitá del prodotto deve essere almeno 1.");
+    }
+
+    // Checks that no new category already exist
+    $catNames = array();
+    $catData = $dbh->getCategories();
+    foreach ($catData as $cat) {
+        array_push($catNames, $cat["name"]);
+    }
+
+    foreach ($newCategories as $newCatName) {
+        if (in_array(ucfirst($newCatName), $catNames)) {
+            array_push($errors, "Categorie giá esistenti non possono essere inserite come nuove.");
+            break;
+        }
+    }
+
+    // image is already on server. No need to check further
+    if ($image == null) {
+        return $errors;
+    }
+
+    // Check the image validity
+    $allowedTypes = array('image/jpeg', 'image/png', 'image/jpg');
+    $fileType = mime_content_type($image['tmp_name']);
+
+    /* Mime type has to match. Checking the extension alone is not secure enough */
+    if (!in_array($fileType, $allowedTypes)) {
+        array_push($errors, "Le estensioni valide per l'immagine sono .jpeg / .jpg / .png");
+    }
+
+    list($width, $height) = getimagesize($image['tmp_name']);
+    if ($width > 1080 || $height > 1920) {
+        array_push($errors, "La dimensione massima delle foto deve essere 1080x1920.");
+    }
+
+    $maxSize = 2*1024*1024; // 2MB max
+    if ($image['size'] > $maxSize) {
+        array_push($errors, "La foto deve pesare massimo 2MB.");
+    }
+
+    return $errors;
+}
+
 ?>

@@ -148,7 +148,7 @@ function mainLogin() {
                             <input type="password" name="password" id="password" required autocomplete="off"
                                 class="border-1 border-black p-1 rounded-sm focus:outline-2 focus:outline-sky-700 focus:bg-sky-50">
                         </fieldset>
-                        <ul class="hidden list-disc list-inside mt-6 text-red-700 text-clip md:col-span-2 text-sm">
+                        <ul class="hidden list-disc list-inside mt-6 text-red-700 text-clip md:col-span-2">
                         </ul>
                         <input type="submit" name="login" value="Accedi"
                             class="cursor-pointer border-1 border-black mt-6 md:mt-12 mb-3 py-1 rounded-full active:inset-shadow-sm active:inset-shadow-gray-800">
@@ -217,7 +217,7 @@ function mainRegister() {
                                 class="border-1 border-black p-1 rounded-sm focus:outline-2 focus:outline-sky-700 focus:bg-sky-50">
                         </p>
                     </fieldset>
-                    <ul class="hidden list-disc list-inside mt-6 text-red-700 text-clip md:col-span-2 text-sm">
+                    <ul class="hidden list-disc list-inside mt-6 text-red-700 text-clip md:col-span-2">
                     </ul>
                     <input type="submit" name="registrazione" value="Registrati"
                         class="md:col-span-2 cursor-pointer border-1 border-black mt-6 md:mt-12 mb-3 py-1 rounded-full active:inset-shadow-sm active:inset-shadow-gray-800">
@@ -230,12 +230,6 @@ async function mainCatalogo(
     uriParams = CATALOGO_CONSTANTS.defaultFilterOptions,
     activePage = 1,
     productsPerPage = CATALOGO_CONSTANTS.productsPerPage) {
-    /*
-    Da passare:
-    - query formata dal form
-    - numero di pagina
-    - numero di prodotti per pagina
-    */
     return `
         <!-- Div per lo stile del page flow -->
     <h1 class="text-center text-xl font-bold mb-5">Prodotti del catalogo</h1>
@@ -244,11 +238,11 @@ async function mainCatalogo(
         <aside class="border-gray-400 border-1 md:border-0 rounded-md px-2 py-1 md:w-7/24">
             <div class="flex flex-row items-center justify-center gap-3">
                 <h2 class="font-semibold text-center md:text-lg">Filtri</h2>
-                <img src="assets/icons/down-arrow.png" alt="Apri/chiudi filti"
-                class="w-4 h-4 md:hidden transition duration-300" />
+                <img src="assets/icons/down-arrow.png" alt="Apri/chiudi filtri"
+                class="w-4 h-4 md:hidden transition duration-300 z-10" />
             </div>
             <!-- flex / hidden (hidden in versione mobile) -->
-            <form action="filtra" class="px-2 py-1 hidden md:flex flex-col gap-5 animate-open">
+            <form action="filtra" class="px-2 py-1 hidden md:flex flex-col gap-5">
                 <fieldset class="border border-solid border-gray-400 p-3 rounded-sm">
                     <legend class="font-medium">Prezzo</legend>
                     <ul class="flex flex-col gap-2">
@@ -298,7 +292,7 @@ async function mainCatalogo(
                                 previewsCategories = match[1].split("%2C");
                             } 
                             let categories = "";
-                            const categoriesData = await apiCaller("categories-info.php");
+                            const categoriesData = await getExistingCategories();
                             categoriesData.forEach(category => {
                                 categories +=
                                 `
@@ -350,9 +344,9 @@ async function mainCatalogo(
         </aside>
         <!-- Sezione ricerca a visualizzazione multipagina prodotti -->
         <section class="w-full flex flex-col gap-5">
-            <header>
-                <form action="cerca" class="flex flex-col md:flex-row md:items-center md:gap-2">
-                    <label for="search">Cerca in base a nome/descrizione </label>
+            <header class="flex flex-col md:flex-row gap-5">
+                <form action="cerca" class="flex flex-col md:flex-row md:items-center md:gap-2 md:grow">
+                    <label for="search">Cerca per nome/descrizione</label>
                     <div class="flex flex-row flex-1">
                         <input type="search" name="search" id="search" autocomplete="off"
                             ${(() => {
@@ -361,10 +355,24 @@ async function mainCatalogo(
                             })()}
                             class="w-full rounded-l-full px-3 py-1 border-1 border-r-0 border-gray-400"
                             placeholder="Nome prodotto / descrizione prodotto" />
-                        <input type="submit" value="Cerca" class="cursor-pointer rounded-r-full px-4 py-1 border-1 border-l-0 border-gray-400
-                            bg-ured active:inset-shadow-sm active:inset-shadow-gray-800">
+                        <input type="submit" value="Cerca" class="cursor-pointer rounded-r-full px-4 py-1 border-1 border-l-0 border-ured
+                            bg-ured active:inset-shadow-sm active:inset-shadow-gray-800 font-medium">
                     </div>
                 </form>
+                ${(() => {
+                    // ADD PRODUCT BUTTON (vendor only)
+                    // logged in as customer
+                    if (USER_INFO.loggedIn && !USER_INFO.user.isCustomer) {
+                        return `
+                        <a href="CRUDProduct" class="flex flex-row justify-center items-center gap-2
+                        font-semibold bg-ugreen py-2 md:px-3 rounded-full text-center">
+                            Aggiungi prodotto
+                            <img src="assets/icons/add.png" class="w-4 h-4">
+                        </a>
+                        `
+                    }
+                    return "";
+                })()}
             </header>
             <div class="flex flex-col gap-3 py-5 md:grid md:grid-cols-4 md:grid-rows-2 md:grow">
             ${await (async () => {
@@ -413,4 +421,119 @@ async function showDisappearingInfoModal(message, time) {
     `
     await sleep(time);
     //div.classList.remove("blur-sm");
+}
+
+async function mainCRUDProduct() {
+    return `
+            <div class="px-2 py-3 flex flex-col justify-center items-center gap-3">
+            <h1 class="font-bold text-xl">Aggiungi prodotto</h1>
+            <section>
+                <form action="CRUDproduct" class="flex flex-col w-full p-3 gap-4 rounded-md">
+                    <fieldset class="border-1 border-gray-400 p-3 rounded-md">
+                        <legend class="font-medium">Criteri di ricerca</legend>
+                        <ul class="flex flex-col gap-3">
+                            <li>
+                                <div class="flex flex-row items-center gap-2">
+                                    <label for="title">Titolo</label>
+                                    <img src="assets/icons/required.png" alt="campo obbligatorio" class="w-4 h-4">
+                                </div>
+                                <input type="text" name="title" id="title" required autocomplete="off" maxlength="255"
+                                    class="border-1 border-black p-1 rounded-sm focus:outline-2 focus:outline-sky-700 focus:bg-sky-50 w-full" />
+                            </li>
+                            <li>
+                                <div class="flex flex-row items-center gap-2">
+                                    <label for="description">Descrizione</label>
+                                    <img src="assets/icons/required.png" alt="campo obbligatorio" class="w-4 h-4">
+                                </div>
+                                <textarea name="description" id="description" required autocomplete="off" maxlength="10000"
+                                    class="border-1 border-black p-1 rounded-sm focus:outline-2 focus:outline-sky-700 focus:bg-sky-50 resize-none h-100 overscroll-y-contain w-full"></textarea>
+                            </li>
+                        </ul>
+                    </fieldset>
+                    <fieldset class="border-1 border-gray-400 p-3 rounded-md">
+                        <legend class="font-medium">Prezzo</legend>
+                        <ul class="grid grid-cols-2 gap-4">
+                            <li>
+                                <div class="flex flex-row items-center gap-2">
+                                    <label for="price">Prezzo intero in €</label>
+                                    <img src="assets/icons/required.png" alt="campo obbligatorio" class="w-4 h-4">
+                                </div>
+                                <input type="number" name="price" id="price" required autocomplete="off" min="0.01" max="99999999.99"
+                                    step=".01"
+                                    class="border-1 border-black p-1 rounded-sm focus:outline-2 focus:outline-sky-700 focus:bg-sky-50 w-full
+                                    [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" />
+                            </li>
+                            <li>
+                                <label for="discountPrice">Prezzo scontato in €</label>
+                                <input type="number" name="discountPrice" id="discountPrice" autocomplete="off"
+                                    min="0.01" step=".01" max="99999999.99"
+                                    class="border-1 border-black p-1 rounded-sm focus:outline-2 focus:outline-sky-700 focus:bg-sky-50 w-full
+                                    [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" />
+                            </li>
+                        </ul>
+                    </fieldset>
+                    <fieldset class="flex flex-col gap-2 border-1 border-gray-400 p-3 rounded-md">
+                        <legend class="font-medium">Categorie</legend>
+                        <div class="grid grid-cols-8 md:grid-cols-2 gap-x-2">
+                            <strong class="col-span-7 md:col-span-1">Inserire minimo una categoria tra quelle esistenti
+                                e quelle
+                                nuove</strong>
+                            <img src="assets/icons/required.png" alt="categoria obbligatoria"
+                                class="w-4 h-4 self-center md:justify-self-start">
+                        </div>
+                        <ul class="grid grid-cols-2 md:grid-cols-3 gap-y-2">
+                        ${await (async () => {
+                            let categories = "";
+                            const categData = await getExistingCategories();
+                            categData.forEach(category => {
+                                categories +=
+                                `
+                                <li class="flex flex-row gap-2">
+                                    <input type="checkbox" name="${category.id}" id="category${category.id}" class="w-4 accent-ured" />
+                                    <label for="category${category.id}">${category.name}</label>
+                                </li>
+                                `
+                            });
+                            return categories;
+                        })()}
+                        </ul>
+                        <label for="newCategories" class="mt-2">Nuove categorie. Se presenti, separarle con degli spazi o delle andate a capo.</label>
+                        <textarea name="newCategories" id="newCategories" autocomplete="off" maxlength="500" placeholder="ESEMPIO:Categoria1 Categoria2 Categoria3" class="border-1 border-black p-1 rounded-sm focus:outline-2 focus:outline-sky-700 focus:bg-sky-50 resize-none h-30 overscroll-y-contain w-full"></textarea>
+                    </fieldset>
+                    <fieldset class="border-1 border-gray-400 p-3 rounded-md">
+                        <legend class="font-medium">Dettagli</legend>
+                        <ul class="grid grid-cols-2 gap-4">
+                            <li>
+                                <div class="flex flex-row items-center gap-2">
+                                    <label for="quantity">Quantitá</label>
+                                    <img src="assets/icons/required.png" alt="campo obbligatorio" class="w-4 h-4">
+                                </div>
+                                <input type="number" name="quantity" id="quantity" required autocomplete="off" min="1" max="99999999"
+                                    step="1"
+                                    class="border-1 border-black p-1 rounded-sm focus:outline-2 focus:outline-sky-700 focus:bg-sky-50 w-full
+                                    [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" />
+                            </li>
+                            <li>
+                                <div class="flex flex-row items-center gap-2">
+                                    <label for="image">Immagine</label>
+                                    <img src="assets/icons/required.png" alt="campo obbligatorio" class="w-4 h-4">
+                                </div>
+                                <input type="file" name="image" id="image" required autocomplete="off" maxlength="255"
+                                    class="border-1 border-black p-1 rounded-sm focus:outline-2 focus:outline-sky-700 focus:bg-sky-50 w-full"
+                                    accept=".jpg, .jpeg, .png" />
+                            </li>
+                        </ul>
+                    </fieldset>
+                    <div class="flex flex-row items-center gap-2">
+                        <img src="assets/icons/required.png" alt="campo obbligatorio" class="w-4 h-4">
+                        <strong>= CAMPO OBBLIGATORIO</strong>
+                    </div>
+                    <ul class="hidden list-disc list-inside mt-6 text-red-700 text-clip md:col-span-2">
+                    </ul>
+                    <input type="submit" value="Aggiungi prodotto" name="addProduct"
+                        class="cursor-pointer active:inset-shadow-sm active:inset-shadow-gray-800 font-semibold bg-ugreen py-2 md:px-3 rounded-full border-1 border-black mt-3" />
+                </form>
+            </section>
+        </div>
+    `
 }

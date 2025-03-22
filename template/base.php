@@ -20,7 +20,7 @@
         </nav>
         <!-- navigazione a scomparsa -->
         <nav class="hidden bg-white w-full md:flex md:flex-1">
-            <ul class="md:flex md:flex-row md:flex-1 md:items-center md:justify-end md:gap-3 md:mr-3">
+            <ul class="md:flex md:flex-row md:flex-1 md:items-center md:justify-end md:gap-3 md:mr-3 z-50">
                 
             </ul>
         </nav>
