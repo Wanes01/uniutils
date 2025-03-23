@@ -31,7 +31,7 @@ function generateProductPreview(productData, wClass, heading) {
                     <ul class="flex flex-col justify-end">
                         <li>
                             <a class="flex items-center justify-center gap-2 border-black border-1 w-full py-1 mt-2 rounded-full active:inset-shadow-sm active:inset-shadow-gray-800"
-                                href="showProduct#${productData[i].id}">
+                                href="productSheet#${productData[i].id}">
                                 <img class="w-5 h-5 aspect-square" src="assets/icons/info.png" alt="">
                                 Scheda prodotto
                             </a>
@@ -645,4 +645,70 @@ async function showConfirmationModal(message, agreeMessage, disagreeMessage) {
             div.classList.remove("blur-sm"); // Rimuove l'effetto sfocato
         }
     });
+}
+
+async function mainProductSheet(productID) {
+    const product = (await apiCaller(`product-by-id.php?id=${productID}`)).product;
+    console.log(product, product.title);
+    return `
+    <article class="flex flex-col gap-3 border-1 border-black m-2 p-4 rounded-lg md:min-h-[80vh]">
+        <header>
+            <h1 class="font-bold text-lg text-center">${product.title}</h1>
+        </header>
+        <!-- informative section about the product -->
+        <section class="flex flex-col justify-center">
+            <div class="flex flex-col md:flex-row md:items-center justify-center gap-5">
+                <!-- image -->
+                <img src="assets/prod/${product.image_name}" alt="${product.title}"
+                    class="max-h-96 max-w-full object-contain text-center" />
+                <!-- description -->
+                <div class="flex flex-col gap-2 md:gap-10">
+                    <section class="flex flex-col gap-2 p-2 md:py-10 border-b-2 border-red-800">
+                        <h2 class="font-bold">Descrizione</h2>
+                        <p>
+                        ${product.description}
+                        </p>
+                    </section>
+                    <section class="flex flex-col gap-3 p-2 md:py-10">
+                        <h2 class="font-bold">Informazioni</h2>
+                        <ul class="flex flex-col gap-2">
+                            <li class="flex flex-col">
+                                <p><strong>Prezzo:</strong> ${product.discount_price ? `<del class="text-red-800">${product.price}</del>` : product.price}</p>
+                            </li>
+                            ${(() => {
+                                if (product.discount_price) {
+                                    return `
+                                    <li class="flex flex-col">
+                                        <p><strong>Prezzo scontato:</strong> ${product.discount_price}</p>
+                                    </li>`;
+                                }
+                                return "";
+                            })()}
+                            <li class="flex flex-col">
+                                <p><strong>Quantitá disponibile:</strong> ${product.quantity_available}</p>
+                            </li>
+                        </ul>
+                    </section>
+                </div>
+            </div>
+        </section>
+        <footer class="${USER_INFO.loggedIn ? "flex" : "hidden"} flex-col md:flex-row justify-center items-center">
+        ${(() => {
+            if (USER_INFO.loggedIn && USER_INFO.user.isCustomer) {
+                return `<form action="#"
+                    class="md:w-2/3 w-full flex flex-col gap-4 border-1 justify-center items-center border-black p-4 rounded-md mt-6 bg-ulyellow">
+                    <fieldset class="flex flex-row gap-2 justify-center items-center">
+                        <legend class="h-0 invisible">Dettagli d'acquisto</legend>
+                        <label for="purchaseQuantity" class="font-medium">Quantitá d'acquisto</label>
+                        <input type="number" name="purchaseQuantity" id="purchaseQuantity" min="1" max="${product.quantity_available}" value="1"
+                            class="border-1 border-black px-1 w-20 rounded-md bg-white">
+                    </fieldset>
+                    <input type="submit" value="Aggiungi al carrello"
+                        class="cursor-pointer px-4 py-2 border-2 border-black rounded-full bg-white font-medium active:inset-shadow-sm active:inset-shadow-gray-800">
+                </form>`;
+            }
+            return "";
+        })()}
+        </footer>
+    </article>`;
 }

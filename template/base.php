@@ -10,7 +10,9 @@
 
 <body class="font-inter">
     <header class="fixed w-full bg-white h-14 flex flex-row flex-wrap py-2">
-        <img src="assets/imgs/logo_orange.png" alt="UniUtils" class="w-40 ml-3" />
+        <a href="vetrina">
+            <img src="assets/imgs/logo_orange.png" alt="UniUtils" class="w-40 ml-3" />
+        </a>
         <!-- navigazione mobile -->
         <nav class="md:hidden flex flex-row flex-1 items-center justify-end gap-4 mr-3" aria-label="notifiche e menú">
             <!-- shortcut per le notifiche -->

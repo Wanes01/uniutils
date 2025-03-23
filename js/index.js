@@ -15,6 +15,7 @@ const HREF_TO_MAINFUNCTION = {
     'registrazione' : mainRegister,
     'catalogo' : mainCatalogo,
     'CRUDProduct' : mainCRUDProduct,
+    'productSheet' : mainProductSheet
 }
 
 /* Associates the form action to the function to call */
@@ -23,7 +24,7 @@ const ACTION_TO_FORMSUBMITTER = {
     'login' : loginSubmitter,
     'filtra' : productFilterSubmitter,
     'cerca' : productFilterSubmitter,
-    'CRUDproduct' : productCRUDSubmitter
+    'CRUDproduct' : productCRUDSubmitter,
 }
 
 /* How many products to display in catalogo and the default
@@ -145,6 +146,12 @@ document.body.addEventListener('click', async function(e) {
             const productID = Number(hrefValue.match(/^updateProduct#([0-9]+)$/)[1]);
             await fillMain(async () => {
                 return await HREF_TO_MAINFUNCTION["CRUDProduct"](productID);
+            });
+        // Links in the format "actionToPerform#selectedID"
+        } else if (hrefValue.match(/^([a-zA-Z_-]+)#([0-9]+)$/)) {
+            const [, command ,id] = hrefValue.match(/^([a-zA-Z_-]+)#([0-9]+)$/);
+            await fillMain(async () => {
+                return await HREF_TO_MAINFUNCTION[command](id);
             });
         // Logs out the user
         } else if (hrefValue == "logout") {
