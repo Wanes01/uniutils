@@ -236,13 +236,15 @@ class DatabaseHelper {
         $stmt->execute();
 
         // the id of the product:
-        $productId = $this->db->insert_id;
+        $productID = $this->db->insert_id;
+        $this->addCategoriesToProductById($categoriesIds, $productID);
+    }
 
-
+    public function addCategoriesToProductById($categoriesIds, $productID) {
         // associates the product with all the categories
         $query = "INSERT INTO product_categories (product_id, category_id) VALUES";
         for ($i = 0; $i < count($categoriesIds); $i++) {
-            $query .= " (" . $productId . ", ?)" . ($i < count($categoriesIds) - 1 ? "," : "");
+            $query .= " (" . $productID . ", ?)" . ($i < count($categoriesIds) - 1 ? "," : "");
         }
 
         $pType = str_repeat("i", count($categoriesIds));
@@ -265,14 +267,7 @@ class DatabaseHelper {
         $stmt->bind_param($pType, ...$categories);
         $stmt->execute();
 
-        // Return the new categories ids
-        $query = "SELECT id, name FROM categories WHERE name IN ("
-        . implode(",", array_fill(0, count($categories), "?")). ")";
-
-        $stmt = $this->db->prepare($query);
-        $stmt->bind_param($pType, ...$categories);
-        $stmt->execute();
-        $result = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+        $result = $this->getCategoriesIdsByNames($categories);
 
         $newIds = array();
         foreach ($result as $category) {
@@ -280,6 +275,20 @@ class DatabaseHelper {
         }
 
         return $newIds;
+    }
+
+    public function getCategoriesIdsByNames($categories) {
+        // Return the new categories ids
+        $query = "SELECT id, name FROM categories WHERE name IN ("
+        . implode(",", array_fill(0, count($categories), "?")). ")";
+
+        $pType = str_repeat("s", count($categories));
+
+        $stmt = $this->db->prepare($query);
+        $stmt->bind_param($pType, ...$categories);
+        $stmt->execute();
+        $result = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+        return $result;
     }
 
     public function getProductByID($id) {
@@ -290,12 +299,66 @@ class DatabaseHelper {
         LEFT JOIN categories c ON pc.category_id = c.id
         WHERE p.id = ?
         GROUP BY p.id";
-        
+
         $stmt = $this->db->prepare($query);
         $stmt->bind_param("i", $id);
         $stmt->execute();
         $result = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         return $result;
+    }
+
+    public function updateProductById(
+        $id,
+        $title,
+        $description,
+        $price,
+        $discountPrice,
+        $categoriesIds,
+        $quantity,
+        $imageName = null) {
+        
+        $query = "UPDATE products SET title = ?, description = ?, quantity_available = ?, price = ?, discount_price = ?";
+
+        $pType = "ssidd";
+        if ($imageName != null) {
+            $pType .= "s";
+            $query .= ", image_name = ?";
+        }
+        $query .= " WHERE id = ?";
+        $pType .= "i";
+
+        $stmt = $this->db->prepare($query);
+        if ($imageName != null) {
+            $stmt->bind_param($pType, $title, $description, $quantity, $price, $discountPrice, $imageName, $id);
+        } else {
+            $stmt->bind_param($pType, $title, $description, $quantity, $price, $discountPrice, $id);
+        }
+        $stmt->execute();
+
+        /* Updates the categories associated with this product. */
+        $this->deleteProductCategoriesById($id);
+        $this->addCategoriesToProductById($categoriesIds, $id);
+    }
+
+    public function deleteProductCategoriesById($productID) {
+        $query = "DELETE FROM product_categories WHERE product_id = ?";
+        $stmt = $this->db->prepare($query);
+        $stmt->bind_param("i", $productID);
+        $stmt->execute();
+    }
+
+    // deletes all categories that are not associated with any product
+    public function deleteUnusedCategories() {
+        $query = "DELETE FROM categories WHERE id NOT IN (SELECT DISTINCT category_id FROM product_categories)";
+        $stmt = $this->db->prepare($query);
+        $stmt->execute();
+    }
+
+    public function deleteProductById($id) {
+        $query = "DELETE FROM products WHERE id = ?";
+        $stmt = $this->db->prepare($query);
+        $stmt->bind_param("i", $id);
+        $stmt->execute();
     }
 }
 ?>

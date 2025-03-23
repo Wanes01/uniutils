@@ -187,8 +187,23 @@ async function getExistingCategories() {
 }
 
 async function productCRUDSubmitter(formData, errorList, CRUDAction) {
-    // the article can be added, updated or deleted
+    // updates the formdata in a format easier to handler server side
     const updatedFormData = new FormData();
+
+    // User wants to delete the product. No need to send the remaining form data
+    if (CRUDAction.match(/^deleteProduct#([0-9]+)$/)) {
+        const productID = Number(CRUDAction.match(/^deleteProduct#([0-9]+)$/)[1]);
+        updatedFormData.append("CRUDAction", "deleteProduct");
+        updatedFormData.append("id", productID);
+        const confirm = await showConfirmationModal("Sei sicuro di voler eliminare questo prodotto?", "⭕ Elimina", "❌ Ci ho ripensato");
+        if (confirm) {
+            await apiCaller("product-crud.php", "POST", updatedFormData);
+            await showDisappearingInfoModal("Operazione avvenuta con successo!", 500);
+            await fillMain(mainCatalogo);
+        }
+        return;
+    }
+
     const categories = []; // group categories id
     formData.keys().forEach(key => {
         if (/^[0-9]\d*$/.test(key)) {
@@ -201,9 +216,20 @@ async function productCRUDSubmitter(formData, errorList, CRUDAction) {
             updatedFormData.append(key, formData.get(key));
         }
     });
-    
-    updatedFormData.append("existingCategories", categories);   
-    updatedFormData.append("CRUDAction", CRUDAction);
+    updatedFormData.append("existingCategories", categories);
+
+    // user is updating a product
+    if (CRUDAction.match(/^updateProduct#([0-9]+)$/)) {
+        const productID = Number(CRUDAction.match(/^updateProduct#([0-9]+)$/)[1]);
+        updatedFormData.append("id", productID);
+        updatedFormData.append("CRUDAction", "updateProduct");
+        if (updatedFormData.get("image").name == "") {
+            updatedFormData.delete("image");
+        }
+    // user is adding a product
+    } else {
+        updatedFormData.append("CRUDAction", CRUDAction);
+    }
 
     const errors = await apiCaller("product-crud.php", "POST", updatedFormData);
     
@@ -217,4 +243,8 @@ async function productCRUDSubmitter(formData, errorList, CRUDAction) {
         });
         return;
     }
+
+    // the crud action was successfull, redirect the user to Catalogo
+    await showDisappearingInfoModal("Operazione avvenuta con successo!", 500);
+    await fillMain(mainCatalogo);
 }

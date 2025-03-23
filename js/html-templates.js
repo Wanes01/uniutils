@@ -1,7 +1,7 @@
 "use strict";
 
 function generateProductPreview(productData, wClass, heading) {
-    const DESCRIPTION_MAX_CHARS = 40;
+    const DESCRIPTION_PREVIEW_MAX_CHARS = 100;
     const products = [];
 
     for (let i = 0; i < productData.length; i++) {
@@ -22,9 +22,9 @@ function generateProductPreview(productData, wClass, heading) {
                             : ""
                     }</p>
                     <p class="mt-3">${
-                        productData[i].description.length <= DESCRIPTION_MAX_CHARS
+                        productData[i].description.length <= DESCRIPTION_PREVIEW_MAX_CHARS
                             ? productData[i].description
-                            : productData[i].description.substring(0, DESCRIPTION_MAX_CHARS) + "..."
+                            : productData[i].description.substring(0, DESCRIPTION_PREVIEW_MAX_CHARS) + "..."
                     }</p>
                 </section>
                 <footer class="flex-1 flex flex-col justify-end">
@@ -447,7 +447,6 @@ async function mainCRUDProduct(productID = null) {
     const productData = productID
         ? await apiCaller(`product-by-id.php?id=${productID}`)
         : null;
-    console.log(productData);
     return `
             <div class="px-2 py-3 flex flex-col justify-center items-center gap-3">
             <section>
@@ -590,12 +589,60 @@ async function mainCRUDProduct(productID = null) {
                     </div>
                     <ul class="hidden list-disc list-inside mt-6 text-red-700 text-clip md:col-span-2">
                     </ul>
-                    <footer>
-                        <input type="submit" value="Aggiungi prodotto" name="addProduct"
-                            class="cursor-pointer active:inset-shadow-sm active:inset-shadow-gray-800 font-semibold bg-ugreen py-2 md:px-3 rounded-full border-1 border-black mt-3" />
+                    <footer class="flex flex-col md:flex-row gap-3">
+                        ${(() => {
+                            // the image is optional on update
+                            return productData && productData.success
+                                ? `<input type="submit" value="Applica modifiche ☑️" name="updateProduct#${productID}"
+                            class="grow cursor-pointer active:inset-shadow-sm active:inset-shadow-gray-800 font-semibold bg-ugreen py-2 md:px-3 rounded-full border-1 border-black mt-3" />
+                            <input type="submit" value="Elimina prodotto ❌" name="deleteProduct#${productID}"
+                            class="grow cursor-pointer active:inset-shadow-sm active:inset-shadow-gray-800 font-semibold bg-ulred py-2 md:px-3 rounded-full border-1 border-black mt-3" />`
+                                : `<input type="submit" value="Aggiungi prodotto ➕" name="addProduct"
+                            class="grow cursor-pointer active:inset-shadow-sm active:inset-shadow-gray-800 font-semibold bg-ugreen py-2 md:px-3 rounded-full border-1 border-black mt-3" />`
+                        })()}
                     </footer>
                 </form>
             </section>
         </div>
     `
+}
+
+async function showConfirmationModal(message, agreeMessage, disagreeMessage) {
+    return new Promise((resolve) => {
+        const main = document.querySelector("main");
+        const div = main.querySelector("div");
+        div.classList.add("blur-sm");
+    
+        // Creazione del modal
+        const modal = document.createElement("div");
+        modal.className = `fixed top-1/2 left-1/2 z-50 transform -translate-x-1/2 -translate-y-1/2
+            py-8 px-10 text-center rounded-md bg-white border-1 border-gray-400 flex flex-col font-medium justify-center items-center
+            shadow-xl shadow-gray-800`;
+        modal.innerHTML = `<p class="text-red-700 font-semibold">${message}</p>
+            <div class="flex flex-col md:flex-row gap-4 mt-6">
+                <button class="cursor-pointer px-4 py-2 border-3 border-red-700 text-red-700 bg-red-100 rounded-full grow 
+                active:inset-shadow-sm active:inset-shadow-gray-800">${agreeMessage}</button>
+                <button class="cursor-pointer px-4 py-2 border-2 border-green-700 text-green-700 bg-green-100 rounded-full grow 
+                active:inset-shadow-sm active:inset-shadow-gray-800">${disagreeMessage}</button>
+            </div>`;
+            
+        main.appendChild(modal);
+    
+        // AGREE BUTTON HANDLER
+        document.querySelector("button:nth-child(1)").addEventListener('click', function() {
+            closeModal();
+            resolve(true);
+        });
+    
+        // DISAGREE BUTTON HANDLER
+        document.querySelector("button:nth-child(2)").addEventListener('click', function() {
+            closeModal();
+            resolve(false);
+        });
+    
+        function closeModal() {
+            modal.remove(); // Rimuove il modal
+            div.classList.remove("blur-sm"); // Rimuove l'effetto sfocato
+        }
+    });
 }

@@ -143,7 +143,6 @@ document.body.addEventListener('click', async function(e) {
         // User wants to update the product informations
         } else if (hrefValue.match(/^updateProduct#([0-9]+)$/)) {
             const productID = Number(hrefValue.match(/^updateProduct#([0-9]+)$/)[1]);
-            console.log(productID);
             await fillMain(async () => {
                 return await HREF_TO_MAINFUNCTION["CRUDProduct"](productID);
             });

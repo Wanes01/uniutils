@@ -159,12 +159,12 @@ function validateProductData(
     }
 
     // Check the image validity
-    $allowedTypes = array('image/jpeg', 'image/png', 'image/jpg');
+    $allowedTypes = array('image/jpeg', 'image/png');
     $fileType = mime_content_type($image['tmp_name']);
 
     /* Mime type has to match. Checking the extension alone is not secure enough */
     if (!in_array($fileType, $allowedTypes)) {
-        array_push($errors, "Le estensioni valide per l'immagine sono .jpeg / .jpg / .png");
+        array_push($errors, "Le estensioni valide per l'immagine sono .jpeg / .png");
     }
 
     list($width, $height) = getimagesize($image['tmp_name']);
@@ -178,6 +178,11 @@ function validateProductData(
     }
 
     return $errors;
+}
+
+function deleteProductImageFile($id, $dbh) {
+    $imageName = $dbh->getProductByID($id)[0]["image_name"];
+    unlink(PROD_DIR_API . $imageName);
 }
 
 ?>

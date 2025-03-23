@@ -1,23 +1,30 @@
 <?php
 require_once '../bootstrap.php';
 
-// Only the vendor can manage the products
-if (!isUserLoggedIn() || isUserCustomer()) {
-    return;
-}
+define("CRUD_ADD", "addProduct");
+define("CRUD_UPDATE", "updateProduct");
+define("CRUD_DELETE", "deleteProduct");
 
-if (!isset($_POST["CRUDAction"])) {
+// Only the vendor can manage the products
+if (!isUserLoggedIn() || isUserCustomer() || !isset($_POST["CRUDAction"])) {
     return;
 }
 
 $action = $_POST["CRUDAction"];
 
-if ($action == "deleteProduct") {
+header('Content-Type: application/json');
+
+// User deletes a product
+if ($action == CRUD_DELETE) {
+    deleteProductImageFile($_POST["id"], $dbh);
+    $dbh->deleteProductById($_POST["id"]);
+    // some categories may be not associated with a product anymore
+    $dbh->deleteUnusedCategories();
+    echo json_encode(array("success" => true));
     return;
 }
 
 // User added or updated a product, input fields must be checked
-
 $existingCategoriesIds = array();
 if ($_POST["existingCategories"] !== "") {
     $existingCategoriesIds = explode(",", $_POST["existingCategories"]);
@@ -30,7 +37,12 @@ if ($_POST["newCategories"] !== "") {
     }
 }
 
-$image = $_FILES['image'];
+// on update the image is not mandatory
+$image = null;
+if ($action == CRUD_ADD
+    || ($action == CRUD_UPDATE && isset($_FILES['image']))) {
+        $image = $_FILES['image'];
+}
 
 $errors = validateProductData(
     $_POST["title"],
@@ -45,7 +57,6 @@ $errors = validateProductData(
 );
 
 // if errors occured product can't be added / updated
-header('Content-Type: application/json');
 if (count($errors) !== 0) {
     echo json_encode($errors);
     return;
@@ -58,15 +69,17 @@ $newCategoriesIds = count($newCategories) != 0
 
 $allCategoriesIds = array_merge($existingCategoriesIds, $newCategoriesIds);
 
-if ($action == "addProduct") {
-    // moves the image to the product images directory 
+// moves the image to the product images directory 
+if ($action == CRUD_ADD
+    || ($action == CRUD_UPDATE && isset($_FILES['image']))) {
+    // multiple images may share the same name. Adds the timestamp to make the name unique
     $uniqueImageName = time() . "_" . $image["name"];
     $destination = PROD_DIR_API . $uniqueImageName;
-
-    // error_log(var_export(array($destination, $image["tmp_name"]), true));
     move_uploaded_file($image["tmp_name"], $destination);
+}
 
-    // adds the product
+// user added a product
+if ($action == CRUD_ADD) {
     $dbh->addProduct(
         $_POST["title"],
         $_POST["description"],
@@ -74,8 +87,26 @@ if ($action == "addProduct") {
         $_POST["discountPrice"] == "" ? null : $_POST["discountPrice"],
         $allCategoriesIds,
         $_POST["quantity"],
-        $uniqueImageName // multiple images may share the same name. Adds the timestamp to make the name unique
+        $uniqueImageName
     );
+// user updated a product
+} else {
+    // user may have changed the image. Delete the previews one if so
+    if (isset($_FILES['image'])) {
+        deleteProductImageFile($_POST["id"], $dbh);
+    }
+    $dbh->updateProductById(
+        $_POST["id"],
+        $_POST["title"],
+        $_POST["description"],
+        $_POST["price"],
+        $_POST["discountPrice"] == "" ? null : $_POST["discountPrice"],
+        $allCategoriesIds,
+        $_POST["quantity"],
+        isset($uniqueImageName) ? $uniqueImageName : null
+    );
+    // on update some categories may not be associated with products anymore
+    $dbh->deleteUnusedCategories();
 }
 
 echo json_encode($errors);
