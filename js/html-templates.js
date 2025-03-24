@@ -649,8 +649,8 @@ async function showConfirmationModal(message, agreeMessage, disagreeMessage) {
 
 async function mainProductSheet(productID) {
     const product = (await apiCaller(`product-by-id.php?id=${productID}`)).product;
-    console.log(product, product.title);
     return `
+    <div class="w-full">
     <article class="flex flex-col gap-3 border-1 border-black m-2 p-4 rounded-lg md:min-h-[80vh]">
         <header>
             <h1 class="font-bold text-lg text-center">${product.title}</h1>
@@ -692,10 +692,10 @@ async function mainProductSheet(productID) {
                 </div>
             </div>
         </section>
-        <footer class="${USER_INFO.loggedIn ? "flex" : "hidden"} flex-col md:flex-row justify-center items-center">
+        <footer class="${USER_INFO.loggedIn ? "flex" : "hidden"} flex-col md:flex-row justify-center items-center flex-1">
         ${(() => {
             if (USER_INFO.loggedIn && USER_INFO.user.isCustomer) {
-                return `<form action="#"
+                return `<form action="CRUDcart"
                     class="md:w-2/3 w-full flex flex-col gap-4 border-1 justify-center items-center border-black p-4 rounded-md mt-6 bg-ulyellow">
                     <fieldset class="flex flex-row gap-2 justify-center items-center">
                         <legend class="h-0 invisible">Dettagli d'acquisto</legend>
@@ -703,12 +703,189 @@ async function mainProductSheet(productID) {
                         <input type="number" name="purchaseQuantity" id="purchaseQuantity" min="1" max="${product.quantity_available}" value="1"
                             class="border-1 border-black px-1 w-20 rounded-md bg-white">
                     </fieldset>
-                    <input type="submit" value="Aggiungi al carrello"
+                    <input type="submit" value="Aggiungi al carrello" name="add#${product.id}"
                         class="cursor-pointer px-4 py-2 border-2 border-black rounded-full bg-white font-medium active:inset-shadow-sm active:inset-shadow-gray-800">
                 </form>`;
+            } else if (USER_INFO.loggedIn && !USER_INFO.isCustomer) {
+               return `<a class="flex items-center justify-center gap-2 border-black border-1 w-full py-1 mt-2 rounded-full
+                        active:inset-shadow-sm active:inset-shadow-gray-800 bg-ulorange md:w-1/3"
+                            href="updateProduct#${productID}">
+                            <img class="w-5 h-5 aspect-square" src="assets/icons/edit.png" alt="">
+                            Modifica prodotto
+                        </a>`;
             }
             return "";
         })()}
         </footer>
-    </article>`;
+    </article>
+    </div>`;
 }
+
+async function mainCarrello() {
+    const DESCRIPTION_PREVIEW_MAX_CHARS = 100;
+    const cart = await apiCaller(`cart-info.php?id=${USER_INFO.user.userId}`);
+    const products = await Promise.all(
+        cart.map(async (entry) => {
+            const prod = (await apiCaller(`product-by-id.php?id=${entry.product_id}`)).product;
+            prod.inCart = entry.quantity;
+            return prod;
+        })
+    );
+    const totalPrice = products.reduce((sum, prod) => {
+        return sum + (parseFloat(prod.price) * parseInt(prod.inCart))
+    }, 0);
+    const totalDiscountPrice = products.reduce((sum, prod) => {
+        return sum + (parseFloat(prod.discount_price ? prod.discount_price : prod.price) * parseInt(prod.inCart));
+    }, 0);
+
+    return `<div class="m-2">
+            <header class="flex flex-row justify-center">
+                <h1 class="font-bold text-xl">Il tuo carrello</h1>
+            </header>
+            <div class="flex flex-col md:flex-row gap-3 mt-6 min-h-[80vh]">
+                <aside class="${totalPrice == 0 ? "hidden" : "flex"} flex-col items-center gap-2 border-1 border-black rounded-md md:min-w-7/24">
+                    <h2
+                        class="bg-usky p-2 font-bold bg-gradient-to-t border-b-1 rounded-b-3xl border-black w-full text-center">
+                        Pagamento</h2>
+                    <ul class="flex flex-col justify-center items-center p-2 md:p-4">
+                        <li class="p-2 ${totalDiscountPrice != totalPrice ? "" : "border-b-2"}">
+                            <p><strong>Prezzo intero:</strong> €${totalPrice.toFixed(2)}</p>
+                        </li>
+                        ${(() => {
+                            if (totalDiscountPrice != totalPrice) {
+                                return `<li class="p-2 border-b-2">
+                                    <p><strong>Risparmio:</strong> €${(totalPrice - totalDiscountPrice).toFixed(2)} (-${computeDiscount(totalPrice, totalDiscountPrice)}%)</p>
+                                </li>`;
+                            }
+                            return "";
+                        })()}
+                        <li class="p-2">
+                            <p><strong>Totale pagamento:</strong> €${totalDiscountPrice.toFixed(2)}</p>
+                        </li>
+                        <li class="p-2 mt-3">
+                            <a href="#"
+                                class="text-nowrap border-1 px-4 py-2 rounded-full bg-ugreen active:inset-shadow-sm active:inset-shadow-gray-800">Paga
+                                e avvia l'ordine</a>
+                        </li>
+                    </ul>
+                </aside>
+                <section class="flex flex-col items-center gap-2 border-t-1 border-black rounded-md md:grow">
+                    <h2
+                        class="bg-ulorange p-2 font-bold bg-gradient-to-t border-b-1 rounded-b-3xl border-black w-full text-center">
+                        Prodotti nel tuo carrello</h2>
+                    <div class="flex flex-col ${cart.length != 0 ? "md:grid md:grid-cols-3" : ""} gap-3 w-full p-2">
+                    ${(() => {
+                        let shownProducts = "";
+
+                        if (cart.length == 0) {
+                            return `<p class="place-self-center mt-10 text-2xl">Non c'é nulla nel tuo carrello 😄</p>`;
+                        }
+                        products.forEach(product => {
+                            shownProducts +=
+                            `
+                            <article class="border-1 border-gray-400 shadow-md shadow-gray-500 py-2 px-2 rounded-sm">
+                                <div class="flex flex-row md:flex-col gap-3">
+                                    <header class="flex items-center justify-center basis-1/3 p-1">
+                                        <img class="min-w-20 w-auto md:max-h-40" src="assets/prod/${product.image_name}" alt="${product.title}" />
+                                    </header>
+                                    <section class="flex flex-col px-1 gap-3">
+                                        <h3 class="font-semibold">${product.title}<h3>
+                                        <p>${
+                                            product.description.length <= DESCRIPTION_PREVIEW_MAX_CHARS
+                                                ? product.description
+                                                : product.description.substring(0, DESCRIPTION_PREVIEW_MAX_CHARS) + "..."
+                                        }</p>
+                                        <p class="mt-3">
+                                        <strong>Prezzo totale:</strong> €${(product.inCart * (product.discount_price ? product.discount_price : product.price)).toFixed(2)}<br/>
+                                        ➡️ ${product.inCart} x €${product.discount_price ? product.discount_price : product.price} ${product.discount_price ? `<del class="text-red-800">${product.price}</del>` : ""}
+                                        </p>
+                                    </section>
+                                </div>
+                                <footer class="mt-3 flex flex-row justify-center items-end grow">
+                                    <ul class="flex flex-col gap-1 justify-center items-center w-full">
+                                        <li class="flex flex-row w-full">
+                                            <a class="grow flex items-center justify-center gap-2 border-black border-1 w-full py-1 px-2 rounded-full active:inset-shadow-sm active:inset-shadow-gray-800"
+                                                href="productSheet#${product.id}">
+                                                <img class="w-5 h-5 aspect-square" src="assets/icons/info.png" alt="">
+                                                Scheda prodotto
+                                            </a>
+                                        <li>
+                                        <li class="flex flex-row w-full">
+                                            <a class="grow flex items-center justify-center gap-2 border-red-700 text-red-700 border-1 w-full py-1 px-2 rounded-full active:inset-shadow-sm active:inset-shadow-gray-800"
+                                                href="deleteFromCart#${product.id}">
+                                                <img class="w-5 h-5 aspect-square" src="assets/icons/remove.png" alt="">
+                                                Rimuovi dal carrello
+                                            </a>
+                                        <li>
+                                    </ul>
+                                </footer>            
+                            </article>
+                            `;
+                        });
+                        return shownProducts;
+                    })()}
+                    </div>
+                </section>
+            </div>
+        </div>`;
+}
+
+/* 
+function generateProductPreview(productData, wClass, heading) {
+    const DESCRIPTION_PREVIEW_MAX_CHARS = 100;
+    const products = [];
+
+    for (let i = 0; i < productData.length; i++) {
+        products.push(
+        `<article
+            class="flex flex-row md:flex-col gap-2 border-1 ${wClass} border-gray-400 shadow-md shadow-gray-500 py-2 px-2 rounded-sm">
+            <header class="flex items-center justify-center basis-1/3">
+                <img class="w-auto md:max-h-40" src="${productData[i].image_name}" alt="${productData[i].title}" />
+            </header>
+            <div class="flex flex-col w-full grow">
+                <section>
+                    <${heading} class="font-bold">${productData[i].title}</${heading}>
+                    <p class="font-semibold">€${productData[i].discount_price ? productData[i].discount_price : productData[i].price} <del class="text-red-800">${
+                        productData[i].discount_price != null ? "€" + productData[i].price : ""
+                    }</del>${
+                        productData[i].discount_price != null
+                            ? " (-" + computeDiscount(productData[i].price, productData[i].discount_price) + "%)"
+                            : ""
+                    }</p>
+                    <p class="mt-3">${
+                        productData[i].description.length <= DESCRIPTION_PREVIEW_MAX_CHARS
+                            ? productData[i].description
+                            : productData[i].description.substring(0, DESCRIPTION_PREVIEW_MAX_CHARS) + "..."
+                    }</p>
+                </section>
+                <footer class="flex-1 flex flex-col justify-end">
+                    <ul class="flex flex-col justify-end">
+                        <li>
+                            <a class="flex items-center justify-center gap-2 border-black border-1 w-full py-1 mt-2 rounded-full active:inset-shadow-sm active:inset-shadow-gray-800"
+                                href="productSheet#${productData[i].id}">
+                                <img class="w-5 h-5 aspect-square" src="assets/icons/info.png" alt="">
+                                Scheda prodotto
+                            </a>
+                        </li>
+                        ${(() => {
+                            // UPDATE BUTTON. Only the vendor can see it
+                            if (USER_INFO.loggedIn && !USER_INFO.user.isCustomer) {
+                                return `
+                                <li>
+                                    <a class="flex items-center justify-center gap-2 border-black border-1 w-full py-1 mt-2 rounded-full
+                                    active:inset-shadow-sm active:inset-shadow-gray-800 bg-ulorange"
+                                        href="updateProduct#${productData[i].id}">
+                                        <img class="w-5 h-5 aspect-square" src="assets/icons/edit.png" alt="">
+                                        Modifica prodotto
+                                    </a>
+                                </li>`;
+                            }
+                            return "";
+                        })()}
+                    </ul>
+                </footer>
+            </div>
+        </article>`);
+    }
+    return products;
+}*/

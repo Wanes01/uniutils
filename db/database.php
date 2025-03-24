@@ -360,5 +360,47 @@ class DatabaseHelper {
         $stmt->bind_param("i", $id);
         $stmt->execute();
     }
+
+    public function addProductToCart($userID, $productID, $quantity) {
+        $query = "INSERT INTO cart (user_id, product_id, quantity) VALUES (?, ?, ?)";
+        $stmt = $this->db->prepare($query);
+        $stmt->bind_param("iii", $userID, $productID, $quantity);
+        $stmt->execute();
+    }
+
+    public function changeProductQuantity($productID, $quantity, $subtraction = true) {
+        $query = "UPDATE products SET quantity_available = quantity_available "
+        . ($subtraction ? "-" : "+") ." ? WHERE id = ?" . ($subtraction ? " AND quantity_available >= ?" : "");
+        $stmt = $this->db->prepare($query);
+        if ($subtraction) {
+            $stmt->bind_param("iii", $quantity, $productID, $quantity);
+        } else {
+            $stmt->bind_param("ii", $quantity, $productID);
+        }
+        $stmt->execute();
+    }
+
+    public function getUserCart($userID) {
+        $query = "SELECT id, user_id, product_id, quantity FROM cart WHERE user_id = ?";
+        $stmt = $this->db->prepare($query);
+        $stmt->bind_param("i", $userID);
+        $stmt->execute();
+        $result = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+        return $result;
+    }
+
+    public function removeProductFromCart($userID, $productID) {
+        $query = "DELETE FROM cart WHERE user_id = ? AND product_id = ?";
+        $stmt = $this->db->prepare($query);
+        $stmt->bind_param("ii", $userID, $productID);
+        $stmt->execute();
+    }
+
+    public function addQuantityToProductInCart($userID, $productID, $quantity) {
+        $query = "UPDATE cart SET quantity = quantity + ? WHERE user_id = ? AND product_id = ?";
+        $stmt = $this->db->prepare($query);
+        $stmt->bind_param("iii", $quantity, $userID, $productID);
+        $stmt->execute();
+    }
 }
 ?>

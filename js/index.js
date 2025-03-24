@@ -15,7 +15,8 @@ const HREF_TO_MAINFUNCTION = {
     'registrazione' : mainRegister,
     'catalogo' : mainCatalogo,
     'CRUDProduct' : mainCRUDProduct,
-    'productSheet' : mainProductSheet
+    'productSheet' : mainProductSheet,
+    'carrello' : mainCarrello,
 }
 
 /* Associates the form action to the function to call */
@@ -25,6 +26,7 @@ const ACTION_TO_FORMSUBMITTER = {
     'filtra' : productFilterSubmitter,
     'cerca' : productFilterSubmitter,
     'CRUDproduct' : productCRUDSubmitter,
+    'CRUDcart' : cartCRUDSubmitter,
 }
 
 /* How many products to display in catalogo and the default
@@ -147,6 +149,8 @@ document.body.addEventListener('click', async function(e) {
             await fillMain(async () => {
                 return await HREF_TO_MAINFUNCTION["CRUDProduct"](productID);
             });
+        } else if (hrefValue.match(/^deleteFromCart#([0-9]+)$/)) {
+            await ACTION_TO_FORMSUBMITTER["CRUDcart"](new FormData(), hrefValue);
         // Links in the format "actionToPerform#selectedID"
         } else if (hrefValue.match(/^([a-zA-Z_-]+)#([0-9]+)$/)) {
             const [, command ,id] = hrefValue.match(/^([a-zA-Z_-]+)#([0-9]+)$/);
@@ -192,6 +196,9 @@ document.body.addEventListener('click', async function(e) {
                 new FormData(filters),
                 new FormData(searchBar),
             );
+            break;
+        case 'CRUDcart':
+            await ACTION_TO_FORMSUBMITTER[action](new FormData(form), submit.name);
             break;
         default:
             await ACTION_TO_FORMSUBMITTER[action](new FormData(form));

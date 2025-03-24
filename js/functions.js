@@ -248,3 +248,17 @@ async function productCRUDSubmitter(formData, errorList, CRUDAction) {
     await showDisappearingInfoModal("Operazione avvenuta con successo!", 500);
     await fillMain(mainCatalogo);
 }
+
+async function cartCRUDSubmitter(formData, submitName) {
+    const [, action ,productID] = submitName.match(/^([a-zA-Z_-]+)#([0-9]+)$/);
+    formData.append("productID", productID);
+    formData.append("action", action);
+    const result = await apiCaller("cart-crud.php", "POST", formData);
+    if (action == "deleteFromCart") {
+        await fillMain(mainCarrello);
+    } else if (result.success) {
+        await showDisappearingInfoModal("Prodotto aggiunto al carrello. Continua a fare acquisti!", 1000);
+        await fillMain(mainCatalogo);
+        await fillNavigation("catalogo");
+    }
+}
