@@ -4,7 +4,8 @@ require_once '../bootstrap.php';
 header('Content-Type: application/json');
 // a cart can be modified by the customer or the vendor only
 if (!isUserLoggedIn()) {
-    return json_encode(array("success" => false));
+    echo json_encode(array("success" => false));
+    return;
 }
 
 $action = $_POST["action"];

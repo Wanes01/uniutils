@@ -185,4 +185,15 @@ function deleteProductImageFile($id, $dbh) {
     unlink(PROD_DIR_API . $imageName);
 }
 
+function computeCartPrice($userID, $dbh) {
+    $cart = $dbh->getUserCart($userID);
+    $price = 0;
+    foreach ($cart as $product) {
+        $productID = $product["product_id"];
+        $productData = ($dbh->getProductByID($productID))[0];
+        $price += $product["quantity"] * ($productData["discount_price"] ? $productData["discount_price"] : $productData["price"]);
+    }
+    return $price;
+}
+
 ?>

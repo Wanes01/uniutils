@@ -9,46 +9,6 @@ class DatabaseHelper {
         }        
     }
 
-    /*
-    public function getRandomDiscountedProducts($n=-1)
-    {
-        $query = "SELECT id, title, description, price, discount_price, image_name
-                FROM products
-                WHERE discount_price IS NOT NULL
-                ORDER BY RAND()";
-        // gets all of them by default
-        if ($n > 0) {
-            $query .= " LIMIT ?";
-        }
-        $stmt = $this->db->prepare($query);
-        if ($n > 0) {
-            $stmt->bind_param('i', $n);
-        }
-        $stmt->execute();
-        $result = $stmt->get_result();
-
-        return $result->fetch_all(MYSQLI_ASSOC);
-    }
-
-    public function getMostPurchasedProducts($n=-1)
-    {
-        $query = "SELECT id, title, description, price, discount_price, image_name, sold_count
-                FROM products
-                ORDER BY sold_count DESC";
-        // gets all of them by default
-        if ($n > 0) {
-            $query .= " LIMIT ?";
-        }
-        $stmt = $this->db->prepare($query);
-        if ($n > 0) {
-            $stmt->bind_param('i', $n);
-        }
-        $stmt->execute();
-        $result = $stmt->get_result();
-
-        return $result->fetch_all(MYSQLI_ASSOC);
-    }*/
-
     // returns true if the username is unique
     public function checkUsernameAvailability($username)
     {
@@ -401,6 +361,69 @@ class DatabaseHelper {
         $stmt = $this->db->prepare($query);
         $stmt->bind_param("iii", $quantity, $userID, $productID);
         $stmt->execute();
+    }
+
+    public function placeOrder($userID, $purchaseDate, $totalPrice) {
+        $query = "INSERT INTO orders (user_id, purchase_date, total_price) VALUES (?, ?, ?)";
+        $stmt = $this->db->prepare($query);
+        $stmt->bind_param("isd", $userID, $purchaseDate, $totalPrice);
+        $stmt->execute();
+        return $this->db->insert_id;
+    }
+
+    public function copyFromCartToOrder($userID, $orderID) {
+        $query = "INSERT INTO order_items (order_id, product_id, quantity, price_per_unit) VALUES ";
+        $cart = $this->getUserCart($userID);
+        $params = array();
+        $pType = "";
+
+        for ($i = 0; $i < count($cart); $i++) {
+            $pType .= "iiid";
+            $query .= "(?, ?, ?, ?)" . ($i < count($cart) - 1 ? ", " : "");
+            $product = $cart[$i];
+            $productData = ($this->getProductByID($product["product_id"]))[0];
+            $pricePerUnit = $productData["discount_price"] ? $productData["discount_price"] : $productData["price"];
+            array_push($params, $orderID, $product["product_id"], $product["quantity"], $pricePerUnit);
+        }
+
+        $stmt = $this->db->prepare($query);
+        $stmt->bind_param($pType, ...$params);
+        $stmt->execute();
+    }
+
+    public function emptyCart($userID) {
+        $query = "DELETE FROM cart WHERE user_id = ?";
+        $stmt = $this->db->prepare($query);
+        $stmt->bind_param("i", $userID);
+        $stmt->execute();
+    }
+
+    public function getOrders($userID = null) {
+        $query = "SELECT id, user_id, purchase_date, delivery_date, total_price, status FROM orders";
+        if ($userID) {
+            $query .= " WHERE user_id = ?";
+        }
+        $query .= " ORDER BY purchase_date DESC";
+
+        $stmt = $this->db->prepare($query);
+        if ($userID) {
+            $stmt->bind_param("i", $userID);
+        }
+        $stmt->execute();
+        $result = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+        return $result;
+    }
+
+    public function getOrderItemAndProductData($orderID) {
+        $query = "SELECT oi.quantity, oi.price_per_unit, 
+        p.title, p.description, p.image_name, p.id FROM order_items oi JOIN products p 
+        ON oi.product_id = p.id WHERE oi.order_id = ?";
+
+        $stmt = $this->db->prepare($query);
+        $stmt->bind_param("i", $orderID);
+        $stmt->execute();
+        $result = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+        return $result;
     }
 }
 ?>

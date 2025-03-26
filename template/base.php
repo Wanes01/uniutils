@@ -15,10 +15,8 @@
         </a>
         <!-- navigazione mobile -->
         <nav class="md:hidden flex flex-row flex-1 items-center justify-end gap-4 mr-3" aria-label="notifiche e menú">
-            <!-- shortcut per le notifiche -->
-            <img src="assets/icons/notifiche.png" alt="Notifiche" class="w-6 h-6 hidden" />
             <!-- Menú ad hamburger -->
-            <img src="assets/icons/menu.png" alt="Menú" class="w-6 h-6" />
+            <img src="assets/icons/menu.png" alt="Menú" class="w-6 h-6 cursor-pointer" />
         </nav>
         <!-- navigazione a scomparsa -->
         <nav class="hidden bg-white w-full md:flex md:flex-1">

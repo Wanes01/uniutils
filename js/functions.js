@@ -50,13 +50,6 @@ async function fillNavigation(active) {
     links.forEach(link => {
         linkList.innerHTML += generateNavItem(link, active);
     });
-
-    const notificationShortcut = document.querySelector("body > header > nav > img");
-    if (links.includes("Notifiche")) {
-        notificationShortcut.classList.remove("hidden");
-    } else {
-        notificationShortcut.classList.add("hidden");
-    }
 }
 
 /* Manages the user registration.
@@ -261,4 +254,31 @@ async function cartCRUDSubmitter(formData, submitName) {
         await fillMain(mainCatalogo);
         await fillNavigation("catalogo");
     }
+}
+
+async function orderSubmitter(formData) {
+    const confirm = await showConfirmationModal("Vuoi pagare e confermare l'ordine?", "Si", "No");
+    if (!confirm) {
+        await fillMain(mainCarrello);
+        await fillNavigation("carrello");
+        return;
+    }
+    const result = await apiCaller("place-order.php", "POST", formData);
+    await showDisappearingInfoModal(
+        result.success ? "✅ Ordine ricevuto! Controlla lo stato del tuo ordine" : "Si é verificato un errore ❌",
+        2000);
+    fillMain(mainCarrello);
+    fillNavigation("carrello");
+}
+
+function formatMySQLTimestamp(timestamp) {
+    const frag = timestamp.split(/[- :]/);
+    return `${frag[2]}/${frag[1]}/${frag[0]}`;
+}
+
+function shortenDescription(description) {
+    const DESCRIPTION_PREVIEW_MAX_CHARS = 100;
+    return description.length <= DESCRIPTION_PREVIEW_MAX_CHARS
+        ? description
+        : description.substring(0, DESCRIPTION_PREVIEW_MAX_CHARS) + "...";
 }

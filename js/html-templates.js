@@ -140,10 +140,7 @@ function generateNavItem(linkTitle, active) {
                     : `md:hover:border-b-black md:w-auto
                     md:hover:bg-gradient-to-t md:hover:from-usky md:hover:via-white md:hover:via-80% md:hover:to-white`;
             }
-        })()
-        } ${
-            linkTitle == "Notifiche" ? "hidden md:block" : ""
-        }"><a class="flex flex-row gap-1 md:py-1 md:px-2 py-6 w-full justify-center items-center font-bold" href="${linkTitle.toLowerCase()}">
+        })()}"><a class="flex flex-row gap-1 md:py-1 md:px-2 py-6 w-full justify-center items-center font-bold" href="${linkTitle.toLowerCase()}">
             <img src="assets/icons/${linkTitle.toLowerCase()}.png" alt="" class="w-3 h-3 md:mb-0.5" />
             ${linkTitle}</a></li>`
 }
@@ -620,9 +617,9 @@ async function showConfirmationModal(message, agreeMessage, disagreeMessage) {
             shadow-xl shadow-gray-800`;
         modal.innerHTML = `<p class="text-red-700 font-semibold">${message}</p>
             <div class="flex flex-col md:flex-row gap-4 mt-6">
-                <button class="cursor-pointer px-4 py-2 border-3 border-red-700 text-red-700 bg-red-100 rounded-full grow 
+                <button class="cursor-pointer px-6 py-2 border-3 border-green-700 text-green-700 bg-green-100 rounded-full grow 
                 active:inset-shadow-sm active:inset-shadow-gray-800">${agreeMessage}</button>
-                <button class="cursor-pointer px-4 py-2 border-2 border-green-700 text-green-700 bg-green-100 rounded-full grow 
+                <button class="cursor-pointer px-6 py-2 border-2 border-red-700 text-red-700 bg-red-100 rounded-full grow 
                 active:inset-shadow-sm active:inset-shadow-gray-800">${disagreeMessage}</button>
             </div>`;
             
@@ -763,7 +760,7 @@ async function mainCarrello() {
                             <p><strong>Totale pagamento:</strong> €${totalDiscountPrice.toFixed(2)}</p>
                         </li>
                         <li class="p-2 mt-3">
-                            <a href="#"
+                            <a href="completeOrder"
                                 class="text-nowrap border-1 px-4 py-2 rounded-full bg-ugreen active:inset-shadow-sm active:inset-shadow-gray-800">Paga
                                 e avvia l'ordine</a>
                         </li>
@@ -790,11 +787,7 @@ async function mainCarrello() {
                                     </header>
                                     <section class="flex flex-col px-1 gap-3">
                                         <h3 class="font-semibold">${product.title}<h3>
-                                        <p>${
-                                            product.description.length <= DESCRIPTION_PREVIEW_MAX_CHARS
-                                                ? product.description
-                                                : product.description.substring(0, DESCRIPTION_PREVIEW_MAX_CHARS) + "..."
-                                        }</p>
+                                        <p>${shortenDescription(product.description)}</p>
                                         <p class="mt-3">
                                         <strong>Prezzo totale:</strong> €${(product.inCart * (product.discount_price ? product.discount_price : product.price)).toFixed(2)}<br/>
                                         ➡️ ${product.inCart} x €${product.discount_price ? product.discount_price : product.price} ${product.discount_price ? `<del class="text-red-800">${product.price}</del>` : ""}
@@ -830,62 +823,198 @@ async function mainCarrello() {
         </div>`;
 }
 
-/* 
-function generateProductPreview(productData, wClass, heading) {
-    const DESCRIPTION_PREVIEW_MAX_CHARS = 100;
-    const products = [];
-
-    for (let i = 0; i < productData.length; i++) {
-        products.push(
-        `<article
-            class="flex flex-row md:flex-col gap-2 border-1 ${wClass} border-gray-400 shadow-md shadow-gray-500 py-2 px-2 rounded-sm">
-            <header class="flex items-center justify-center basis-1/3">
-                <img class="w-auto md:max-h-40" src="${productData[i].image_name}" alt="${productData[i].title}" />
-            </header>
-            <div class="flex flex-col w-full grow">
-                <section>
-                    <${heading} class="font-bold">${productData[i].title}</${heading}>
-                    <p class="font-semibold">€${productData[i].discount_price ? productData[i].discount_price : productData[i].price} <del class="text-red-800">${
-                        productData[i].discount_price != null ? "€" + productData[i].price : ""
-                    }</del>${
-                        productData[i].discount_price != null
-                            ? " (-" + computeDiscount(productData[i].price, productData[i].discount_price) + "%)"
-                            : ""
-                    }</p>
-                    <p class="mt-3">${
-                        productData[i].description.length <= DESCRIPTION_PREVIEW_MAX_CHARS
-                            ? productData[i].description
-                            : productData[i].description.substring(0, DESCRIPTION_PREVIEW_MAX_CHARS) + "..."
-                    }</p>
-                </section>
-                <footer class="flex-1 flex flex-col justify-end">
-                    <ul class="flex flex-col justify-end">
-                        <li>
-                            <a class="flex items-center justify-center gap-2 border-black border-1 w-full py-1 mt-2 rounded-full active:inset-shadow-sm active:inset-shadow-gray-800"
-                                href="productSheet#${productData[i].id}">
-                                <img class="w-5 h-5 aspect-square" src="assets/icons/info.png" alt="">
-                                Scheda prodotto
-                            </a>
-                        </li>
-                        ${(() => {
-                            // UPDATE BUTTON. Only the vendor can see it
-                            if (USER_INFO.loggedIn && !USER_INFO.user.isCustomer) {
-                                return `
-                                <li>
-                                    <a class="flex items-center justify-center gap-2 border-black border-1 w-full py-1 mt-2 rounded-full
-                                    active:inset-shadow-sm active:inset-shadow-gray-800 bg-ulorange"
-                                        href="updateProduct#${productData[i].id}">
-                                        <img class="w-5 h-5 aspect-square" src="assets/icons/edit.png" alt="">
-                                        Modifica prodotto
-                                    </a>
-                                </li>`;
-                            }
-                            return "";
-                        })()}
-                    </ul>
-                </footer>
+async function mainCompleteOrder() {
+    return `<!-- Background image flex div -->
+        <div
+            class="flex flex-col justify-center items-center bg-[url(../assets/imgs/login_background.jpg)] bg-cover bg-right md:bg-bottom bg-no-repeat w-full h-[110vh] md:h-[90vh] py-3">
+            <!-- Actual card -->
+            <div class="flex flex-col items-center justify-center w-6/7 md:w-2/3 lg:w-4/7 m-3 bg-white
+                shadow-[0px_0px_30px_5px_#6C1100] border-1 border-black rounded-sm p-3 md:px-5">
+                <h1 class="text-lg font-bold text-center">Conferma dati di spedizione e pagamento</h1>
+                <form action="confirmOrder" class="flex flex-col gap-3 p-2 w-full">
+                    <fieldset disabled="disabled" class="border-1 border-gray-400 p-4 rounded-md flex flex-col min-w-0">
+                        <legend class="font-semibold">Dati di spedizione</legend>
+                        <ul class="flex flex-col w-full gap-3">
+                            <li class="flex flex-col gap-3 md:flex-row">
+                                <div class="flex flex-col md:w-1/2">
+                                    <label for="name">Nome acquirente</label>
+                                    <input type="text" name="name" id="name" required="true" max-length="255" value="${USER_INFO.user.name}"
+                                        class="border-1 border-black p-1 rounded-sm focus:outline-2 focus:outline-sky-700 focus:bg-sky-50" />
+                                </div>
+                                <div class="flex flex-col md:w-1/2">
+                                    <label for="surname">Cognome acquirente</label>
+                                    <input type="text" name="surname" id="surname" required="true" max-length="255" value="${USER_INFO.user.surname}"
+                                        class="border-1 border-black p-1 rounded-sm focus:outline-2 focus:outline-sky-700 focus:bg-sky-50" />
+                                </div>
+                            </li>
+                            <li class="flex flex-col md:basis-full">
+                                <label for="address">Indirizzo di spedizione</label>
+                                <input type="text" name="address" id="address" required="true" max-length="255" value="${USER_INFO.user.address}"
+                                    class="border-1 border-black p-1 rounded-sm focus:outline-2 focus:outline-sky-700 focus:bg-sky-50" />
+                            </li>
+                        </ul>
+                    </fieldset>
+                    <fieldset disabled="disabled"
+                        class="border-1 border-gray-400 p-4 rounded-md flex flex-col min-w-0 bg-gray-200 text-gray-500">
+                        <legend class="font-semibold">Dati di pagamento</legend>
+                        <ul class="flex flex-col w-full gap-3">
+                            <li class="flex flex-col gap-3 md:flex-row">
+                                <div class="flex flex-col md:w-1/2">
+                                    <label for="pName">Nome sulla carta</label>
+                                    <input type="text" name="pName" id="pName" value="${USER_INFO.user.name}"
+                                        class="border-1 border-black p-1 rounded-sm focus:outline-2 focus:outline-sky-700 focus:bg-sky-50" />
+                                </div>
+                                <div class="flex flex-col md:w-1/2">
+                                    <label for="pSurname">Cognome sulla carta</label>
+                                    <input type="text" name="pSurname" id="pSurname" value="${USER_INFO.user.surname}"
+                                        class="border-1 border-black p-1 rounded-sm focus:outline-2 focus:outline-sky-700 focus:bg-sky-50" />
+                                </div>
+                            </li>
+                            <li class="flex flex-col gap-3 md:flex-row">
+                                <div class="flex flex-col md:w-5/6">
+                                    <label for="creditCard">Carta di credito</label>
+                                    <input type="number" name="creditCard" id="creditCard" value="1234123412341234"
+                                        class="border-1 border-black p-1 rounded-sm focus:outline-2 focus:outline-sky-700 focus:bg-sky-50 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" />
+                                </div>
+                                <div class="flex flex-col md:w-1/6">
+                                    <label for="cvv">CVV</label>
+                                    <input type="number" name="cvv" id="cvv" value="123"
+                                        class="border-1 border-black p-1 rounded-sm focus:outline-2 focus:outline-sky-700 focus:bg-sky-50 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" />
+                                </div>
+                            </li>
+                        </ul>
+                    </fieldset>
+                    <input type="submit" value="Ordina e paga"
+                        class="cursor-pointer font-semibold px-3 py-2 border-1 border-black bg-ugreen rounded-full mt-5 active:inset-shadow-sm active:inset-shadow-gray-800">
+                </form>
             </div>
-        </article>`);
-    }
-    return products;
-}*/
+        </div>`;
+}
+
+async function mainOrdini() {
+    const ORDER_ITEMS_COLS = 4;
+    const orders = await apiCaller("orders-info.php");
+    //console.log("ORDERS", orders);
+    return `<div class="flex flex-col gap-3 my-2 mx-3 md:mx-15 min-h-[80vh]">
+            <header>
+                <h1 class="font-bold text-xl text-center">I tuoi ordini</h1>
+            </header>
+            <!-- Ordini -->
+            <div class="flex flex-col w-full gap-5">
+            ${await (async () => {
+                // Creates an article for each order
+                let orderHtml = "";
+                for (let ordNum = 0; ordNum < orders.length; ordNum++) {
+                    const order = orders[ordNum];
+                    const orderItems = await apiCaller(`order-items-info.php?id=${order.id}`);
+                    orderHtml += `<article class="flex flex-col border-4 border-double border-black rounded-md overflow-hidden odd:bg-orange-300 even:bg-blue-300">
+                    <header class="flex flex-row">
+                        <ul
+                            class="grid grid-cols-2 grid-rows-2 content-center justify-items-center items-center border-r-1 gap-1 bg-white px-2 py-1">
+                            ${(()=> {
+                                let prevImgs = "";
+                                for (let i = 0; i < 4 && i < orderItems.length; i++) {
+                                    prevImgs += `<li class="max-w-10 max-h-10">
+                                        <img src="assets/prod/${orderItems[i].image_name}" alt="${orderItems[i].title}">
+                                    </li>`;
+                                }
+                                return prevImgs;
+                            })()}
+                        </ul>
+                        <div class="p-2 flex flex-col md:flex-row gap-2 w-full justify-between">
+                            <ul class="flex flex-col">
+                                <li>
+                                    <h2 class="font-bold underline underline-offset-4">Ordine n. ${order.id}</h2>
+                                </li>
+                                <li>
+                                    <p><strong>Stato ordine:</strong> ${order.status}</p>
+                                </li>
+                                ${order.delivery_date
+                                ? `<li>
+                                    <p><strong>Data di consegna stimata:</strong> ${formatMySQLTimestamp(order.delivery_date)}</p>
+                                </li>`
+                                : ""}
+                            </ul>
+                            <a href="expandDetails"
+                                class="text-black self-center h-10 flex flex-row justify-center items-center gap-2 px-10 py-2 border-2 border-black bg-white rounded-full w-full md:w-auto">
+                                <p class="text-nowrap">Apri/Chiudi dettagli</p>
+                                <img src="assets/icons/down-arrow.png" alt="" class="w-4 h-4">
+                            </a>
+                        </div>
+                    </header>
+                    <div class="hidden animate-open flex-col gap-4 ${ordNum % 2 == 0 ? "bg-orange-100" : "bg-blue-100"} md:px-10 md:py-4 px-3 py-5 border-t-3 border-dashed">
+                        <section class="flex flex-col gap-3 border-1 border-black p-2 bg-white rounded-md">
+                            <h3 class="font-bold underline text-center">Dettagli</h3>
+                            <ul>
+                                <li>
+                                    <p><strong>Indirizzo di consegna:</strong> ${USER_INFO.user.address}</p>
+                                </li>
+                                <li>
+                                    <p><strong>Data d'acquisto:</strong> ${formatMySQLTimestamp(order.purchase_date)}</p>
+                                </li>
+                                <li>
+                                    <p><strong>Prezzo pagato:</strong> €${order.total_price}</p>
+                                </li>
+                                <li>
+                                    <p><strong>Codice ordine:</strong> ${order.id}</p>
+                                </li>
+                            </ul>
+                        </section>
+                        <section class="flex flex-col gap-3 border-1 border-black rounded-md bg-white p-2">
+                            <h3 class="font-bold underline text-center">Articoli inclusi nell'ordine</h3>
+                            <div class="flex flex-col gap-3 md:gap-0 md:grid md:grid-cols-${ORDER_ITEMS_COLS}">
+                            <!-- Product injection -->
+                            ${(() => {
+                                let productPreview = "";
+                                let i = 0;
+                                //console.log("ITEM", orderItems.length);
+                                orderItems.forEach(product => {
+                                    //console.log(`$i=${i}, orderItems=${orderItems.length}, i < orderItems.length - ORDER_ITEMS_COLS = ${i < orderItems.length - ORDER_ITEMS_COLS}`);
+                                    productPreview += `<article
+                                    class="py-2 px-2 bg-white border-t-1 md:border-t-0 ${(() => {
+                                        let border = "";
+                                        border += i <= orderItems.length - ORDER_ITEMS_COLS + 1 ? "md:border-b-1 " : "";
+                                        border += (i + 1) % ORDER_ITEMS_COLS != 0 ? "md:border-r-1" : "";
+                                        return border;
+                                        })()} border-gray-600">
+                                    <div class="flex flex-row md:flex-col gap-3">
+                                        <header class="flex items-center justify-center basis-1/3 p-1">
+                                            <img class="min-w-20 w-auto md:max-h-40"
+                                                src="assets/prod/${product.image_name}" alt="${product.title}" />
+                                        </header>
+                                        <section class="flex flex-col px-1 gap-3">
+                                            <h4 class="font-semibold">${product.title}<h4>
+                                                    <p>${shortenDescription(product.description)}</p>
+                                                    <p class="mt-3">
+                                                        <strong>Prezzo totale:</strong> €${(product.quantity * product.price_per_unit).toFixed(2)}<br />
+                                                        ➡️ ${product.quantity} x ${product.price_per_unit}
+                                                    </p>
+                                        </section>
+                                    </div>
+                                    <footer class="mt-3 flex flex-row justify-center items-end grow">
+                                        <ul class="flex flex-col gap-1 justify-center items-center w-full">
+                                            <li class="flex flex-row w-full">
+                                                <a class="grow flex items-center justify-center gap-2 border-black border-1 w-full py-1 px-2 rounded-full active:inset-shadow-sm active:inset-shadow-gray-800"
+                                                    href="productSheet#${product.id}">
+                                                    <img class="w-5 h-5 aspect-square" src="assets/icons/info.png"
+                                                        alt="">
+                                                    Scheda prodotto
+                                                </a>
+                                            <li>
+                                        </ul>
+                                    </footer>
+                                </article>`;
+                                i++;
+                                });
+                                return productPreview;
+                            })()}
+                            </div>
+                        </section>
+                    </div>
+                </article>`;
+                }
+                return orderHtml;
+            })()}
+            </div>
+        </div>`;
+}

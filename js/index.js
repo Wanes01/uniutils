@@ -17,6 +17,8 @@ const HREF_TO_MAINFUNCTION = {
     'CRUDProduct' : mainCRUDProduct,
     'productSheet' : mainProductSheet,
     'carrello' : mainCarrello,
+    'completeOrder' : mainCompleteOrder,
+    'ordini' : mainOrdini
 }
 
 /* Associates the form action to the function to call */
@@ -27,6 +29,7 @@ const ACTION_TO_FORMSUBMITTER = {
     'cerca' : productFilterSubmitter,
     'CRUDproduct' : productCRUDSubmitter,
     'CRUDcart' : cartCRUDSubmitter,
+    'confirmOrder' : orderSubmitter
 }
 
 /* How many products to display in catalogo and the default
@@ -82,6 +85,26 @@ document.body.addEventListener('click', async function(e) {
         return;
     }
 
+    /* closest ensures that the click occurred anywhere inside
+    the target element or is the target element itself */
+    const link = e.target.closest("a");
+    const submit = e.target.closest("form input[type='submit']");
+
+    if (e.target.closest("a[href='expandDetails']")) {
+        const detailsBox = (e.target.closest("a[href='expandDetails']").parentNode.parentNode).nextSibling.nextElementSibling;
+        const downArrow = (e.target.closest("a[href='expandDetails']")).children[1];
+        if (detailsBox.classList.contains("hidden")) {
+            downArrow.src = "assets/icons/up-arrow.png";
+            detailsBox.classList.remove("hidden");
+            detailsBox.classList.add("flex");
+        } else {
+            downArrow.src = "assets/icons/down-arrow.png";
+            detailsBox.classList.remove("flex");
+            detailsBox.classList.add("hidden");
+        }
+        return;
+    }
+
     /* filter box in catalogo can be opened/closed if
     the viewport matches a mobile device (Tailwind uses 768px
     for the "md" breakpoint, matching devices larger than tablets */
@@ -105,12 +128,8 @@ document.body.addEventListener('click', async function(e) {
     } else if (e.target.closest("div aside div")
         && document.documentElement.clientWidth >= 768) {
             filterForm.classList.remove("animate-open");
-        }
-
-    /* closest ensures that the click occurred anywhere inside
-    the target element or is the target element itself */
-    const link = e.target.closest("a");
-    const submit = e.target.closest("form input[type='submit']");
+        return;
+    }
 
     /* Do an action only if its a link or a submitted form */
     if (link == null && submit == null) {
@@ -124,6 +143,7 @@ document.body.addEventListener('click', async function(e) {
             return;
         }
 
+        document.querySelector("head title").innerHTML = "UniUtils - " + String(hrefValue).charAt(0).toUpperCase() + String(hrefValue).slice(1);
         // Jumps into the catalogo with a category already selected
         if (hrefValue.match(/^catalogo#([0-9]+)$/)) {
             const categoryID = hrefValue.match(/^catalogo#([0-9]+)$/)[1];
@@ -156,7 +176,7 @@ document.body.addEventListener('click', async function(e) {
             const [, command ,id] = hrefValue.match(/^([a-zA-Z_-]+)#([0-9]+)$/);
             await fillMain(async () => {
                 return await HREF_TO_MAINFUNCTION[command](id);
-            });
+            });  
         // Logs out the user
         } else if (hrefValue == "logout") {
             await logoutUser();
