@@ -399,11 +399,13 @@ class DatabaseHelper {
     }
 
     public function getOrders($userID = null) {
-        $query = "SELECT id, user_id, purchase_date, delivery_date, total_price, status FROM orders";
+        $query = "SELECT o.id, o.user_id, o.purchase_date, o.delivery_date, o.total_price, o.status,
+        u.first_name, u.last_name, u.username, u.address 
+        FROM orders o INNER JOIN users u ON o.user_id = u.id";
         if ($userID) {
-            $query .= " WHERE user_id = ?";
+            $query .= " WHERE u.id = ?";
         }
-        $query .= " ORDER BY purchase_date DESC";
+        $query .= " ORDER BY o.purchase_date DESC";
 
         $stmt = $this->db->prepare($query);
         if ($userID) {
@@ -421,6 +423,23 @@ class DatabaseHelper {
 
         $stmt = $this->db->prepare($query);
         $stmt->bind_param("i", $orderID);
+        $stmt->execute();
+        $result = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+        return $result;
+    }
+
+    public function updateOrder($orderID, $status, $deliveryDate = null) {
+        $query = "UPDATE orders SET status = ?, delivery_date = ? WHERE id = ?";
+        $stmt = $this->db->prepare($query);
+        $stmt->bind_param("ssi", $status, $deliveryDate, $orderID);
+        $stmt->execute();
+    }
+
+    public function getUserNotifications($userID) {
+        $query = "SELECT id, user_id, title, message, is_read, created_at FROM notifications 
+        WHERE user_id = ? ORDER BY is_read ASC, created_at DESC";
+        $stmt = $this->db->prepare($query);
+        $stmt->bind_param("i", $userID);
         $stmt->execute();
         $result = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         return $result;

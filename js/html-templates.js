@@ -720,7 +720,7 @@ async function mainProductSheet(productID) {
 
 async function mainCarrello() {
     const DESCRIPTION_PREVIEW_MAX_CHARS = 100;
-    const cart = await apiCaller(`cart-info.php?id=${USER_INFO.user.userId}`);
+    const cart = await apiCaller(`cart-info.php`);
     const products = await Promise.all(
         cart.map(async (entry) => {
             const prod = (await apiCaller(`product-by-id.php?id=${entry.product_id}`)).product;
@@ -894,14 +894,16 @@ async function mainCompleteOrder() {
 async function mainOrdini() {
     const ORDER_ITEMS_COLS = 4;
     const orders = await apiCaller("orders-info.php");
-    //console.log("ORDERS", orders);
     return `<div class="flex flex-col gap-3 my-2 mx-3 md:mx-15 min-h-[80vh]">
             <header>
-                <h1 class="font-bold text-xl text-center">I tuoi ordini</h1>
+                <h1 class="font-bold text-xl text-center">${USER_INFO.loggedIn && !USER_INFO.user.isCustomer ? "Ordini dei clienti" : "I tuoi ordini"}</h1>
             </header>
             <!-- Ordini -->
             <div class="flex flex-col w-full gap-5">
             ${await (async () => {
+                if (orders.length == 0) {
+                    return `<p class="text-2xl text-center mt-6">Non hai ancora effettuato nessun ordine 😄</p>`;
+                }
                 // Creates an article for each order
                 let orderHtml = "";
                 for (let ordNum = 0; ordNum < orders.length; ordNum++) {
@@ -946,8 +948,13 @@ async function mainOrdini() {
                         <section class="flex flex-col gap-3 border-1 border-black p-2 bg-white rounded-md">
                             <h3 class="font-bold underline text-center">Dettagli</h3>
                             <ul>
+                                ${USER_INFO.loggedIn && !USER_INFO.user.isCustomer
+                                    ? `<li>
+                                        <p><strong>Acquirente:</strong> ${order.last_name} ${order.first_name} [${order.username}]</p>
+                                    </li>`
+                                    : ""}
                                 <li>
-                                    <p><strong>Indirizzo di consegna:</strong> ${USER_INFO.user.address}</p>
+                                    <p><strong>Indirizzo di consegna:</strong> ${order.address}</p>
                                 </li>
                                 <li>
                                     <p><strong>Data d'acquisto:</strong> ${formatMySQLTimestamp(order.purchase_date)}</p>
@@ -967,9 +974,7 @@ async function mainOrdini() {
                             ${(() => {
                                 let productPreview = "";
                                 let i = 0;
-                                //console.log("ITEM", orderItems.length);
                                 orderItems.forEach(product => {
-                                    //console.log(`$i=${i}, orderItems=${orderItems.length}, i < orderItems.length - ORDER_ITEMS_COLS = ${i < orderItems.length - ORDER_ITEMS_COLS}`);
                                     productPreview += `<article
                                     class="py-2 px-2 bg-white border-t-1 md:border-t-0 ${(() => {
                                         let border = "";
@@ -1010,11 +1015,111 @@ async function mainOrdini() {
                             })()}
                             </div>
                         </section>
+                        ${(() => {
+                            if (USER_INFO.loggedIn && !USER_INFO.user.isCustomer) {
+                                return `<footer class="flex flex-col gap-3 border-1 border-black p-2 bg-white rounded-md">
+                                    <h3 class="font-bold underline text-center">Modifica stato e data di consegna</h3>
+                                    <form action="updateOrder" class="flex flex-col gap-3">
+                                        <fieldset class="border-1 border-gray-400 rounded-md px-3 py-2">
+                                            <legend>Stato dell'ordine e data di consegna</legend>
+                                            <ul class="flex flex-col gap-2">
+                                                <li class="flex flex-row gap-2">
+                                                    <input type="radio" id="avviato#${order.id}" name="status#${order.id}" value="avviato" class="w-4 accent-ured" ${order.status == "avviato" ? "checked" : ""} />
+                                                    <label for="avviato#${order.id}">Avviato</label>
+                                                </li>
+                                                <li class="flex flex-row gap-2">
+                                                    <input type="radio" id="spedito#${order.id}" name="status#${order.id}" value="spedito" class="w-4 accent-ured" ${order.status == "spedito" ? "checked" : ""} />
+                                                    <label for="spedito#${order.id}">Spedito</label>
+                                                </li>
+                                                <li class="flex flex-row gap-2">
+                                                    <input type="radio" id="ricevuto#${order.id}" name="status#${order.id}" value="ricevuto" class="w-4 accent-ured" ${order.status == "ricevuto" ? "checked" : ""}/>
+                                                    <label for="ricevuto#${order.id}">Ricevuto</label>
+                                                </li>
+                                                <li class="flex flex-row gap-2">
+                                                    <input type="radio" id="annullato#${order.id}" name="status#${order.id}" value="annullato" class="w-4 accent-ured" ${order.status == "annullato" ? "checked" : ""} />
+                                                    <label for="annullato#${order.id}">Annullato</label>
+                                                </li>
+                                                <li class="flex flex-row gap-2 items-center">
+                                                    <label for="deliveryDate#${order.id}">Data di consegna</label>
+                                                    <input type="date" name="deliveryDate#${order.id}" id="deliveryDate#${order.id}" onchange="italianDateFormat(this.value, ${order.id})" min="${(() => {
+                                                        let today = new Date();
+                                                        today = new Date(today.setDate(today.getDate() + 1)).toISOString().split('T')[0];
+                                                        return today;
+                                                        })()}" value="${order.delivery_date ? order.delivery_date.split(" ")[0] : ""}"
+                                                         class="border-1 border-black p-1 rounded-sm focus:outline-2 focus:outline-sky-700 focus:bg-sky-50 w-8"/>
+                                                    <label for="deliveryDate#${order.id}">${order.delivery_date ? formatMySQLTimestamp(order.delivery_date) : ""}</label>
+                                                </li>
+                                            </ul>
+                                        </fieldset>
+                                        <div class="flex flex-col md:flex-row gap-3">
+                                            <input type="submit" value="Cambia stato e data di consegna" name="${order.id}" class="p-2 border-1 border-black bg-ugreen rounded-full grow active:inset-shadow-sm active:inset-shadow-gray-800 cursor-pointer text-center"/>
+                                            <input type="reset" value="Reimposta stato e data di consegna" class="p-2 border-1 border-black bg-ulred rounded-full grow active:inset-shadow-sm active:inset-shadow-gray-800 cursor-pointer text-center"/>
+                                        </div>
+                                    </form>
+                                </footer>`
+                            }
+                            return "";
+                        })()}
                     </div>
                 </article>`;
                 }
                 return orderHtml;
             })()}
             </div>
+        </div>`;
+}
+
+async function mainNotifiche() {
+    const notifications = await apiCaller("notifications-info.php");
+    console.log(notifications);
+    return `        <div class="m-2 md:mx-10 md:my-6 flex flex-col gap-5 min-h-[80vh]">
+            <div class="flex flex-col md:flex-row gap-3 md:justify-between md:items-center">
+                <h1 class="text-2xl font-bold text-center">Le tue notifiche</h1>
+                <div class="flex flex-col md:flex-row items-center gap-4 md:gap-2 text-nowrap">
+                    <a href="#"
+                        class="px-4 py-1 rounded-full border-2 font-semibold border-red-800 text-red-800 w-full text-center bg-red-100 active:inset-shadow-sm active:inset-shadow-gray-800">Elimina
+                        tutte le
+                        notifiche</a>
+                    <a href="#"
+                        class="px-4 py-1 rounded-full border-2 font-semibold border-sky-800 text-sky-800 w-full text-center bg-sky-100 active:inset-shadow-sm active:inset-shadow-gray-800">Segna
+                        tutte come
+                        lette</a>
+                </div>
+            </div>
+            <!-- Actual notifications -->
+            <section class="border-1 border-gray-500 shadow-lg rounded-md overflow-hidden">
+                <ul class="flex flex-col divide-y-2 divide-dashed">
+                ${(() => {
+                    if (notifications.length == 0) {
+                        return `<p class="text-2xl text-center my-6">Non hai nessuna notifica 📩</p>`;
+                    }
+
+                    let notificationsHTML = "";
+                    notifications.forEach(notification => {
+                        notificationsHTML += `<li class="pt-3 bg-gradient-to-b ${notification.is_read ? "from-gray-400 to-40% to-gray-100" : "from-orange-200 to-40% to-amber-100"}">
+                        <article class="p-3 flex flex-col gap-2">
+                            <header class="flex flex-row justify-between items-center bg-white/20 px-2 py-1 rounded-md">
+                                <h2 class="font-bold underline underline-offset-3">${notification.title}</h2>
+                                <img src="assets/icons/${notification.is_read ? "read" : "unread"}.png" alt="${notification.is_read ? "Notifica giá letta" : "Notifica non ancora letta"}" class="w-7" />
+                            </header>
+                            <p class="bg-white/20 px-2 py-1 rounded-md">${notification.message}</p>
+                            <footer class="flex flex-row gap-2 justify-end">
+                                <a href="#"
+                                    class="px-2 py-1 rounded-full border-2 font-semibold border-red-800 text-red-800 basis-1/2 text-center md:basis-1/5 bg-white active:inset-shadow-sm active:inset-shadow-gray-800">Elimina
+                                    notifica</a>
+                                ${notification.is_read
+                                    ? ""
+                                    : `<a href="#"
+                                    class="px-2 py-1 rounded-full border-2 font-semibold border-sky-800 text-sky-800 basis-1/2 text-center md:basis-1/5 bg-white active:inset-shadow-sm active:inset-shadow-gray-800">Segna
+                                    come
+                                    letta</a>`}
+                            </footer>
+                        </article>
+                    </li>`;
+                    });
+                    return notificationsHTML;
+                })()}
+                </ul>
+            </section>
         </div>`;
 }

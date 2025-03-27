@@ -267,8 +267,8 @@ async function orderSubmitter(formData) {
     await showDisappearingInfoModal(
         result.success ? "✅ Ordine ricevuto! Controlla lo stato del tuo ordine" : "Si é verificato un errore ❌",
         2000);
-    fillMain(mainCarrello);
-    fillNavigation("carrello");
+    fillMain(mainOrdini);
+    fillNavigation("ordini");
 }
 
 function formatMySQLTimestamp(timestamp) {
@@ -281,4 +281,31 @@ function shortenDescription(description) {
     return description.length <= DESCRIPTION_PREVIEW_MAX_CHARS
         ? description
         : description.substring(0, DESCRIPTION_PREVIEW_MAX_CHARS) + "...";
+}
+
+function italianDateFormat(isoDate, orderID) {
+    if (!isoDate) {
+        return;
+    };
+    const date = new Date(isoDate);
+    const itFormat = date.toLocaleDateString("it-IT"); // DD/MM/YYYY date format
+    const dateDisplayer = document.getElementById(`deliveryDate#${orderID}`).nextElementSibling;
+    dateDisplayer.innerHTML = itFormat;
+}
+
+async function updateOrderSubmitter(formData) {
+    const updatedFormData = new FormData();
+    for (const [key, value] of formData) {
+        const [, param ,id] = key.match(/^([a-zA-Z_-]+)#([0-9]+)$/);
+        updatedFormData.append(param, value);
+        if (!updatedFormData.has("orderID")) {
+            updatedFormData.append("orderID", id);
+        }
+    }
+    
+    const response = await apiCaller("update-order.php", "POST", updatedFormData);
+
+    if (response.success) {
+        await fillMain(mainOrdini);
+    }
 }

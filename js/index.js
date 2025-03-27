@@ -18,7 +18,8 @@ const HREF_TO_MAINFUNCTION = {
     'productSheet' : mainProductSheet,
     'carrello' : mainCarrello,
     'completeOrder' : mainCompleteOrder,
-    'ordini' : mainOrdini
+    'ordini' : mainOrdini,
+    'notifiche' : mainNotifiche
 }
 
 /* Associates the form action to the function to call */
@@ -29,7 +30,8 @@ const ACTION_TO_FORMSUBMITTER = {
     'cerca' : productFilterSubmitter,
     'CRUDproduct' : productCRUDSubmitter,
     'CRUDcart' : cartCRUDSubmitter,
-    'confirmOrder' : orderSubmitter
+    'confirmOrder' : orderSubmitter,
+    'updateOrder' : updateOrderSubmitter
 }
 
 /* How many products to display in catalogo and the default
@@ -82,6 +84,13 @@ document.body.addEventListener('click', async function(e) {
     // special behavior for the reset button of the Catalogo forms
     if (e.target.closest("form[action='filtra'] input[type='reset']")) {
         await fillMain(HREF_TO_MAINFUNCTION["catalogo"]);
+        return;
+    } else if (e.target.closest("form[action='updateOrder'] input[type='reset']")) {
+        const form = e.target.closest("form[action='updateOrder']");
+        const datePicker = form.querySelector("input[type='date']");
+        datePicker.removeAttribute("value");
+        const dateLabel = datePicker.nextElementSibling;
+        dateLabel.innerHTML = "";
         return;
     }
 
