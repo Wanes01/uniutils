@@ -19,7 +19,7 @@ const HREF_TO_MAINFUNCTION = {
     'carrello' : mainCarrello,
     'completeOrder' : mainCompleteOrder,
     'ordini' : mainOrdini,
-    'notifiche' : mainNotifiche
+    'notifiche' : mainNotifiche,
 }
 
 /* Associates the form action to the function to call */
@@ -180,6 +180,14 @@ document.body.addEventListener('click', async function(e) {
             });
         } else if (hrefValue.match(/^deleteFromCart#([0-9]+)$/)) {
             await ACTION_TO_FORMSUBMITTER["CRUDcart"](new FormData(), hrefValue);
+        } else if (hrefValue.match(/^markNotificationAsRead#([0-9]+)$/)) {
+            const notID = Number(hrefValue.match(/^markNotificationAsRead#([0-9]+)$/)[1]);
+            await markNotificationAsRead(notID);
+        } else if (hrefValue.match(/^deleteNotification#([0-9]+)$/)) {
+            const notID = Number(hrefValue.match(/^deleteNotification#([0-9]+)$/)[1]);
+            await deleteNotification(notID);
+        } else if (hrefValue == "readAllNotifications" || hrefValue == "deleteAllNotifications") {
+            await bulkNotificationOp(hrefValue);
         // Links in the format "actionToPerform#selectedID"
         } else if (hrefValue.match(/^([a-zA-Z_-]+)#([0-9]+)$/)) {
             const [, command ,id] = hrefValue.match(/^([a-zA-Z_-]+)#([0-9]+)$/);

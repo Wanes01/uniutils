@@ -276,6 +276,11 @@ function formatMySQLTimestamp(timestamp) {
     return `${frag[2]}/${frag[1]}/${frag[0]}`;
 }
 
+function formatMySQLTimestampWithTime(timestamp) {
+    const frag = timestamp.split(/[- :]/);
+    return `${frag[2]}/${frag[1]}/${frag[0]} alle ${frag[3]}:${frag[4]}`;
+}
+
 function shortenDescription(description) {
     const DESCRIPTION_PREVIEW_MAX_CHARS = 100;
     return description.length <= DESCRIPTION_PREVIEW_MAX_CHARS
@@ -307,5 +312,36 @@ async function updateOrderSubmitter(formData) {
 
     if (response.success) {
         await fillMain(mainOrdini);
+    }
+}
+
+async function markNotificationAsRead(notificationID) {
+    const result = await apiCaller(`mark-as-read.php?id=${notificationID}`);
+    if (result.success) {
+        await fillMain(mainNotifiche);
+    }
+}
+
+async function deleteNotification(notificationID) {
+    const result = await apiCaller(`delete-notification.php?id=${notificationID}`);
+    if (result.success) {
+        await fillMain(mainNotifiche);
+    }
+}
+
+async function bulkNotificationOp(operation) {
+    const confirm = await showConfirmationModal(
+        `Sei sicuro di voler ${operation == "readAllNotifications" ? "leggere" : "cancellare"} tutte le notifiche?`,
+        "Si, voglio procedere.",
+        "No, ci ho ripensato"
+    );
+    
+    if (!confirm) {
+        return;
+    }
+
+    const result = await apiCaller(`bulk-notifications.php?op=${operation == "readAllNotifications" ? "read" : "delete"}`);
+    if (result.success) {
+        await fillMain(mainNotifiche);
     }
 }

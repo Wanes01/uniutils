@@ -17,5 +17,13 @@ $dbh->updateOrder(
     $_POST["status"],
     $_POST["deliveryDate"] == "" ? null : $_POST["deliveryDate"]);
 
+// notify the user about the order status change.
+$title = "Aggiornamento dal tuo ordine (n. " . $_POST["orderID"] . ")";
+$message = "Il tuo ordine ha appena cambiato stato! Il nuovo stato del tuo ordine é " . $_POST["status"] . ".";
+$message .= $_POST["deliveryDate"] != "" ? "\nLa data di consegna stimata é " . formatDateIt($_POST["deliveryDate"]) . "." : "";
+$userID = $dbh->getUserByOrder($_POST["orderID"]);
+
+$dbh->sendNotification($title, $message, $userID);
+
 echo json_encode(array("success" => true));
 ?>

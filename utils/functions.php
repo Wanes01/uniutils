@@ -196,4 +196,14 @@ function computeCartPrice($userID, $dbh) {
     return $price;
 }
 
+function formatDateIt($date) {
+    $dataFormat = DateTime::createFromFormat('Y-m-d', $date);
+    return $dataFormat->format('d-m-Y');
+}
+
+function computeDiscountPercentage($original, $offer) {
+    $perc = (1 - ($offer / $original)) * 100;
+    return number_format($perc, 2);
+}
+
 ?>

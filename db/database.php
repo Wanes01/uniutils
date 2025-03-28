@@ -59,7 +59,7 @@ class DatabaseHelper {
         return $result;
     }
 
-    public function filterProducts($options) {
+    public function filterProducts($options, $hideOutOfStock) {
         $query = "SELECT DISTINCT p.id, p.title, p.description, p.price, p.discount_price, p.image_name, 
         p.sold_count, p.quantity_available FROM products p";
         // Categories selected. Inner joins to access categories data
@@ -67,6 +67,10 @@ class DatabaseHelper {
             $query .= " JOIN product_categories pc ON p.id = pc.product_id";
         }
         $query .= " WHERE p.price BETWEEN ? AND ?";
+
+        if ($hideOutOfStock) {
+            $query .= " AND p.quantity_available > 0";
+        }
 
         if (isset($options["onlyOffers"])) {
             $query .= " AND p.discount_price IS NOT NULL";
@@ -443,6 +447,78 @@ class DatabaseHelper {
         $stmt->execute();
         $result = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         return $result;
+    }
+
+    public function markNotificationAsRead($userID, $notificationID) {
+        $query = "UPDATE notifications SET is_read = 1 WHERE user_id = ? AND id = ?";
+        $stmt = $this->db->prepare($query);
+        $stmt->bind_param("ii", $userID, $notificationID);
+        $stmt->execute();
+    }
+
+    public function deleteNotification($userID, $notificationID) {
+        $query = "DELETE FROM notifications WHERE user_id = ? AND id = ?";
+        $stmt = $this->db->prepare($query);
+        $stmt->bind_param("ii", $userID, $notificationID);
+        $stmt->execute();
+    }
+
+    public function readAllNotifications($userID) {
+        $query = "UPDATE notifications SET is_read = 1 WHERE user_id = ?";
+        $stmt = $this->db->prepare($query);
+        $stmt->bind_param("i", $userID);
+        $stmt->execute();
+    }
+
+    public function deleteAllNotifications($userID) {
+        $query = "DELETE FROM notifications WHERE user_id = ?";
+        $stmt = $this->db->prepare($query);
+        $stmt->bind_param("i", $userID);
+        $stmt->execute();
+    }
+
+    // if user is not specified then the notification is sent to all users execept for the vendor
+    public function sendNotification($title, $message, $userID = null) {
+        $query = "INSERT INTO notifications (user_id, title, message) VALUES ";
+        $pType = "";
+        $params = array();
+
+        if ($userID) {
+            $query .= "(?, ?, ?)";
+            $pType = "iss";
+            array_push($params, $userID, $title, $message);
+        } else {
+            // get all the user ids, except the vendor's id
+            $stmt = $this->db->prepare("SELECT id FROM users WHERE role = 1");
+            $stmt->execute();
+            $ids = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+
+            for ($i = 0; $i < count($ids); $i++) {
+                $query .= "(?, ?, ?)" . ($i < count($ids) - 1 ? ", " : "");
+                $pType .= "iss";
+                array_push($params, $ids[$i]["id"], $title, $message);
+            }
+        }
+
+        $stmt = $this->db->prepare($query);
+        $stmt->bind_param($pType, ...$params);
+        $stmt->execute();
+    }
+
+    public function getUserByOrder($orderID) {
+        $query = "SELECT user_id FROM orders WHERE id = ?";
+        $stmt = $this->db->prepare($query);
+        $stmt->bind_param("i", $orderID);
+        $stmt->execute();
+        $result = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+        return $result[0]["user_id"];
+    }
+
+    public function getVendorId() {
+        $stmt = $this->db->prepare("SELECT id FROM users WHERE role = 0");
+        $stmt->execute();
+        $result = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+        return $result[0]["id"];
     }
 }
 ?>

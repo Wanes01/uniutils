@@ -1071,16 +1071,15 @@ async function mainOrdini() {
 
 async function mainNotifiche() {
     const notifications = await apiCaller("notifications-info.php");
-    console.log(notifications);
     return `        <div class="m-2 md:mx-10 md:my-6 flex flex-col gap-5 min-h-[80vh]">
             <div class="flex flex-col md:flex-row gap-3 md:justify-between md:items-center">
                 <h1 class="text-2xl font-bold text-center">Le tue notifiche</h1>
                 <div class="flex flex-col md:flex-row items-center gap-4 md:gap-2 text-nowrap">
-                    <a href="#"
+                    <a href="deleteAllNotifications"
                         class="px-4 py-1 rounded-full border-2 font-semibold border-red-800 text-red-800 w-full text-center bg-red-100 active:inset-shadow-sm active:inset-shadow-gray-800">Elimina
                         tutte le
                         notifiche</a>
-                    <a href="#"
+                    <a href="readAllNotifications"
                         class="px-4 py-1 rounded-full border-2 font-semibold border-sky-800 text-sky-800 w-full text-center bg-sky-100 active:inset-shadow-sm active:inset-shadow-gray-800">Segna
                         tutte come
                         lette</a>
@@ -1097,19 +1096,22 @@ async function mainNotifiche() {
                     let notificationsHTML = "";
                     notifications.forEach(notification => {
                         notificationsHTML += `<li class="pt-3 bg-gradient-to-b ${notification.is_read ? "from-gray-400 to-40% to-gray-100" : "from-orange-200 to-40% to-amber-100"}">
-                        <article class="p-3 flex flex-col gap-2">
-                            <header class="flex flex-row justify-between items-center bg-white/20 px-2 py-1 rounded-md">
-                                <h2 class="font-bold underline underline-offset-3">${notification.title}</h2>
-                                <img src="assets/icons/${notification.is_read ? "read" : "unread"}.png" alt="${notification.is_read ? "Notifica giá letta" : "Notifica non ancora letta"}" class="w-7" />
+                        <article class="p-3 flex flex-col gap-3">
+                            <header class="flex flex-col gap-2 bg-white/20 px-2 py-1 rounded-md">
+                                <div class="flex flex-row justify-between items-center">
+                                    <h2 class="font-bold underline underline-offset-3">${notification.title}</h2>
+                                    <img src="assets/icons/${notification.is_read ? "read" : "unread"}.png" alt="${notification.is_read ? "Notifica giá letta" : "Notifica non ancora letta"}" class="w-7" />
+                                </div>
+                                <p class="text-sm font-medium">Ricevuta il ${formatMySQLTimestampWithTime(notification.created_at)}</p>
                             </header>
                             <p class="bg-white/20 px-2 py-1 rounded-md">${notification.message}</p>
                             <footer class="flex flex-row gap-2 justify-end">
-                                <a href="#"
+                                <a href="deleteNotification#${notification.id}"
                                     class="px-2 py-1 rounded-full border-2 font-semibold border-red-800 text-red-800 basis-1/2 text-center md:basis-1/5 bg-white active:inset-shadow-sm active:inset-shadow-gray-800">Elimina
                                     notifica</a>
                                 ${notification.is_read
                                     ? ""
-                                    : `<a href="#"
+                                    : `<a href="markNotificationAsRead#${notification.id}"
                                     class="px-2 py-1 rounded-full border-2 font-semibold border-sky-800 text-sky-800 basis-1/2 text-center md:basis-1/5 bg-white active:inset-shadow-sm active:inset-shadow-gray-800">Segna
                                     come
                                     letta</a>`}

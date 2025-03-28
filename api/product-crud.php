@@ -1,6 +1,9 @@
 <?php
 require_once '../bootstrap.php';
 
+// users get notified of an offert if the product has at leat a MIN_DISCOUNT_FOR_NOTIFICATION % discount
+define ("MIN_DISCOUNT_FOR_NOTIFICATION", 20);
+
 define("CRUD_ADD", "addProduct");
 define("CRUD_UPDATE", "updateProduct");
 define("CRUD_DELETE", "deleteProduct");
@@ -107,6 +110,17 @@ if ($action == CRUD_ADD) {
     );
     // on update some categories may not be associated with products anymore
     $dbh->deleteUnusedCategories();
+}
+
+// notify all the customers if it's a big discount
+if ($_POST["discountPrice"] != "") {
+    $perc = computeDiscountPercentage($_POST["price"], $_POST["discountPrice"]);
+    if ($perc >= MIN_DISCOUNT_FOR_NOTIFICATION) {
+        $title = "Super sconto per te!";
+        $message = 'Dai una occhiata a "' . $_POST["title"] .'" ad un prezzo imperdibibile! Con un mega sconto del ' . $perc . '%, lo puoi prendere a soli €' . $_POST["discountPrice"] . ' al posto di €' . $_POST["price"] . '. Le scorte sono limitate, affrettati!';
+        // the notification is sent to all customers
+        $dbh->sendNotification($title, $message);
+    }
 }
 
 echo json_encode($errors);

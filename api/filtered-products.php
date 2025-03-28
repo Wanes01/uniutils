@@ -25,7 +25,8 @@ if (isset($_GET["categories"])) {
 
 // retrivies the products info from the database with the specified filters
 if (!isset($_GET["count"])) {
-    $products = $dbh->filterProducts($filterOptions);
+    $isVendor = isUserLoggedIn() && !isUserCustomer();
+    $products = $dbh->filterProducts($filterOptions, !$isVendor);
 
     // converts the image name to the image full path
     for($i = 0; $i < count($products); $i++){
