@@ -1125,3 +1125,80 @@ async function mainNotifiche() {
             </section>
         </div>`;
 }
+
+async function mainContatti() {
+    const vendorEmail = (await apiCaller("get-vendor-email.php")).email;
+    return `<div class="gap-3 m-2 min-h-[80vh] flex flex-row justify-center">
+            <section class="leading-7 flex flex-col gap-3 md:w-[60%]">
+                <h1 class="font-bold text-xl text-center">${USER_INFO.loggedIn && !USER_INFO.user.isCustomer ? "Notifica i tuoi clienti" : "Contatta il venditore"}</h1>
+                ${USER_INFO.loggedIn && !USER_INFO.user.isCustomer
+                    ? ""
+                    : `<p class="text-center">
+                        Per poter comunicare con noi potete scrivere una mail al seguente indirizzo: <a
+                            href="mailto:${vendorEmail}"
+                            class="text-sky-700 underline underline-offset-2">${vendorEmail}</a>. Cercheremo di
+                        ricontattarvi il prima possibile
+                    </p>
+                    <p class="text-center">
+                        <strong>Solo per gli utenti registrati:</strong> potete contattarci inviandoci una notifica
+                        compilando il seguente form
+                    </p>`
+                }
+                ${await (async () => {
+                    if (!USER_INFO.loggedIn) {
+                        return `<div class="my-6 md:my-10 p-5 flex flex-col gap-4 border-1 border-black rounded-md justify-center items-center">
+                            <p class="text-center"><strong>Form contatti riservato agli utenti registrati.</strong><br/>Non sei ancora registrato? Clicca il bottone per registrarti</p>
+                            <a href="registrazione" class="px-2 md:px-5 py-1 w-3/4 rounded-full border-2 border-red-700 text-center font-semibold text-red-700 bg-red-50 active:inset-shadow-sm active:inset-shadow-gray-800">Registrati</a>
+                        </div>`;
+                    }
+                    return `<form action="sendNotification" class="my-6 md:my-10 flex flex-col">
+                    <fieldset
+                        class="flex flex-col border-solid border-2 border-orange-900 rounded-md px-5 py-4 bg-orange-100">
+                        <legend
+                            class="ml-auto mr-auto px-2 font-semibold rounded-md bg-white border-2 border-solid border-orange-900 text-center text-lg">
+                            Contenuto
+                            della
+                            notifica
+                        </legend>
+                        <ul class="flex flex-col gap-2">
+                            <li class="${USER_INFO.loggedIn && !USER_INFO.user.isCustomer ? "flex" : "hidden"} flex-col gap-1">
+                                <label for="user" class="font-semibold">Utente da contattare</label>
+                                <select name="user" id="user" ${USER_INFO.loggedIn && !USER_INFO.user.isCustomer ? "required" : ""} 
+                                    class="bg-white border-1 border-orange-900 px-1 py-2 rounded-sm focus:outline-2 focus:outline-orange-900">
+                                    <option value="all">Tutti i clienti</option>
+                                    ${await (async () => {
+                                        // loads customers data only if its the vendor (its also checked server side)
+                                        if (USER_INFO.loggedIn && !USER_INFO.user.isCustomer) {
+                                            const customersData = await apiCaller("customers-info.php");
+                                            let options = "";
+                                            customersData.forEach(customer => {
+                                                options += `<option value="${customer.id}">[${customer.username}] ${customer.last_name} ${customer.first_name} | ID: ${customer.id}</option>
+                                                `;
+                                            });
+                                            return options;
+                                        }
+                                        return "";
+                                    })()}
+                                </select>
+                            </li>
+                            <li class="flex flex-col gap-1">
+                                <label for="title" class="font-semibold">Titolo del messaggio</label>
+                                <input type="text" name="title" id="title" required maxlength="255" 
+                                    class="bg-white border-1 border-sky-900 p-1 rounded-sm focus:outline-2 focus:outline-orange-900" />
+                            </li>
+                            <li class="flex flex-col gap-1">
+                                <label for="message" class="font-semibold">Messaggio</label>
+                                <textarea name="message" id="message" required maxlength="5000" 
+                                    class="bg-white h-80 resize-none border-1 border-sky-900 p-1 rounded-sm focus:outline-2 focus:outline-orange-900"></textarea>
+                            </li>
+                        </ul>
+                    </fieldset>
+                    <ul class="hidden list-disc list-inside mt-6 text-red-800 text-clip md:col-span-2">
+                    </ul>
+                    <input type="submit" value="Manda notifica"
+                        class="cursor-pointer mt-6 py-1 px-2 border-2 border-orange-900 border-solid rounded-md text-orange-900 font-semibold active:inset-shadow-sm active:inset-shadow-gray-800 bg-orange-100" />
+                </form>`;
+                })()}
+            </section>
+        </div>`;
+}

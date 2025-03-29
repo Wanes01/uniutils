@@ -520,5 +520,20 @@ class DatabaseHelper {
         $result = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         return $result[0]["id"];
     }
+
+    public function getCustomers() {
+        $stmt = $this->db->prepare("SELECT id, first_name, last_name, username FROM users WHERE role = 1");
+        $stmt->execute();
+        $result = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+        return $result;
+    }
+
+    public function getUserById($id) {
+        $stmt = $this->db->prepare("SELECT first_name, last_name, username, email, address FROM users WHERE id = ?");
+        $stmt->bind_param("i", $id);
+        $stmt->execute();
+        $result = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+        return $result[0];
+    }
 }
 ?>

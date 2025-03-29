@@ -206,4 +206,21 @@ function computeDiscountPercentage($original, $offer) {
     return number_format($perc, 2);
 }
 
+function validateNotificationData($title, $message) {
+    define("TITLE_MAX_LENGTH", 255);
+    define("MESSAGE_MAX_LENGTH", 5000);
+    $errors = array();
+
+    if (strlen($title) == 0 || strlen($message) == 0) {
+        array_push($errors, "Il titolo ed il messaggio non possono essere vuoti.");
+    }
+    if (strlen($title) > TITLE_MAX_LENGTH) {
+        array_push($errors, "Il titolo non deve superare " . TITLE_MAX_LENGTH . " caratteri.");
+    }
+    if (strlen($message) > MESSAGE_MAX_LENGTH) {
+        array_push($errors, "Il messaggio non deve superare " . MESSAGE_MAX_LENGTH . " caratteri.");
+    }
+
+    return $errors;
+}
 ?>

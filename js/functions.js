@@ -345,3 +345,33 @@ async function bulkNotificationOp(operation) {
         await fillMain(mainNotifiche);
     }
 }
+
+async function sendNotificationSubmitter(formData, errorList) {
+    // Confirms the vendor choise of sending a notification to all customers
+    if (USER_INFO.loggedIn && !USER_INFO.user.isCustomer && formData.get("user") === "all") {
+        const confirm = await showConfirmationModal(
+            "⚠️ ATTENZIONE! La notifica verrá ricevuta da tutti i clienti. Sei sicuro della scelta del destinatario?",
+            "Si, mandala a tutti.",
+            "No, ci ho ripensato."
+        );
+        if (!confirm) {
+            return;
+        }
+    }
+
+    const errors = await apiCaller("send-notification.php", "POST", formData);
+    
+    if (errors.length > 0) {
+        errorList.classList.remove("hidden");
+        errorList.innerHTML = "";
+        errors.forEach(err => {
+            const errLine = document.createElement("li");
+            errLine.innerText = err;
+            errorList.appendChild(errLine);
+        });
+        return;
+    }
+
+    await showDisappearingInfoModal("✅ La notifica é stata correttamente inviata!", 2000);
+    fillMain(mainContatti);
+}

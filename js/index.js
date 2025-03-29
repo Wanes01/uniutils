@@ -20,6 +20,7 @@ const HREF_TO_MAINFUNCTION = {
     'completeOrder' : mainCompleteOrder,
     'ordini' : mainOrdini,
     'notifiche' : mainNotifiche,
+    'contatti' : mainContatti,
 }
 
 /* Associates the form action to the function to call */
@@ -31,7 +32,8 @@ const ACTION_TO_FORMSUBMITTER = {
     'CRUDproduct' : productCRUDSubmitter,
     'CRUDcart' : cartCRUDSubmitter,
     'confirmOrder' : orderSubmitter,
-    'updateOrder' : updateOrderSubmitter
+    'updateOrder' : updateOrderSubmitter,
+    'sendNotification' : sendNotificationSubmitter,
 }
 
 /* How many products to display in catalogo and the default
@@ -219,6 +221,7 @@ document.body.addEventListener('click', async function(e) {
         case 'login':
         case 'registrazione':
         case 'CRUDproduct':
+        case 'sendNotification':
             // login, register and the crud product forms have a list to display input errors
             const errorList = document.querySelector("form > ul:last-of-type");
             await action != 'CRUDproduct'
