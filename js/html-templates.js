@@ -32,7 +32,7 @@ function generateProductPreview(productData, wClass, heading) {
                         <li>
                             <a class="flex items-center justify-center gap-2 border-black border-1 w-full py-1 mt-2 rounded-full active:inset-shadow-sm active:inset-shadow-gray-800"
                                 href="productSheet#${productData[i].id}">
-                                <img class="w-5 h-5 aspect-square" src="assets/icons/info.png" alt="">
+                                <img class="w-5 h-5 aspect-square" src="assets/icons/info.png" alt="" />
                                 Scheda prodotto
                             </a>
                         </li>
@@ -44,7 +44,7 @@ function generateProductPreview(productData, wClass, heading) {
                                     <a class="flex items-center justify-center gap-2 border-black border-1 w-full py-1 mt-2 rounded-full
                                     active:inset-shadow-sm active:inset-shadow-gray-800 bg-ulorange"
                                         href="updateProduct#${productData[i].id}">
-                                        <img class="w-5 h-5 aspect-square" src="assets/icons/edit.png" alt="">
+                                        <img class="w-5 h-5 aspect-square" src="assets/icons/edit.png" alt="" />
                                         Modifica prodotto
                                     </a>
                                 </li>`;
@@ -62,7 +62,7 @@ function generateProductPreview(productData, wClass, heading) {
 async function mainVetrina() {
     const userInfo = await getUserInfo();
     return `
-    <div class="md:px-10 px-2 mb-7">
+    <div class="md:px-10 px-2 mb-7 min-h-[80vh]">
     <section class="md:flex md:flex-row">
         <img class="hidden md:inline md:w-1/4 md:object-cover" src="assets/imgs/girl_studying.png" alt="" />
         <div class="flex flex-col justify-center text-center my-3 mx-2 md:w-1/2">
@@ -159,19 +159,19 @@ function mainLogin() {
                             <legend class="invisible h-0">Credenziali</legend>
                             <label for="email" class="mt-3 md:mt-6">Email</label>
                             <input type="email" name="email" id="email" required autocomplete="off"
-                                class="border-1 border-black p-1 rounded-sm focus:outline-2 focus:outline-sky-700 focus:bg-sky-50">
+                                class="border-1 border-black p-1 rounded-sm focus:outline-2 focus:outline-sky-700 focus:bg-sky-50" />
                             <label for="password" class="mt-3 md:mt-6">Password</label>
                             <input type="password" name="password" id="password" required autocomplete="off"
-                                class="border-1 border-black p-1 rounded-sm focus:outline-2 focus:outline-sky-700 focus:bg-sky-50">
+                                class="border-1 border-black p-1 rounded-sm focus:outline-2 focus:outline-sky-700 focus:bg-sky-50" />
                         </fieldset>
                         <ul class="hidden list-disc list-inside mt-6 text-red-700 text-clip md:col-span-2">
                         </ul>
                         <input type="submit" name="login" value="Accedi"
-                            class="cursor-pointer border-1 border-black mt-6 md:mt-12 mb-3 py-1 rounded-full active:inset-shadow-sm active:inset-shadow-gray-800">
+                            class="cursor-pointer border-1 border-black mt-6 md:mt-12 mb-3 py-1 rounded-full active:inset-shadow-sm active:inset-shadow-gray-800" />
                     </form>
                 </section>
                 <section class="flex flex-col px-2 md:h-full md:w-1/2 justify-center items-center h-40 bg-[#FF6142]">
-                    <h2 class="font-bold text-center">Sei nuovo da queste parti?<br>
+                    <h2 class="font-bold text-center">Sei nuovo da queste parti?<br/>
                         Unisciti a noi!</h2>
                     <a href="registrazione"
                         class="bg-white px-5 py-2 rounded-full mt-2 border-1 border-black active:inset-shadow-sm active:inset-shadow-gray-800">Registrati</a>
@@ -196,17 +196,17 @@ function mainRegister() {
                         <p class="flex flex-col justify-center">
                             <label for="name" class="mt-3 md:mt-6">Nome</label>
                             <input type="text" name="name" id="name" maxlength="100" required autocomplete="off"
-                                class="border-1 border-black p-1 rounded-sm focus:outline-2 focus:outline-sky-700 focus:bg-sky-50">
+                                class="border-1 border-black p-1 rounded-sm focus:outline-2 focus:outline-sky-700 focus:bg-sky-50" />
                         </p>
                         <p class="flex flex-col justify-center">
                             <label for="surname" class="mt-3 md:mt-6">Cognome</label>
                             <input type="text" name="surname" id="surname" maxlength="100" required autocomplete="off"
-                                class="border-1 border-black p-1 rounded-sm focus:outline-2 focus:outline-sky-700 focus:bg-sky-50">
+                                class="border-1 border-black p-1 rounded-sm focus:outline-2 focus:outline-sky-700 focus:bg-sky-50" />
                         </p>
                         <p class="flex flex-col justify-center md:col-span-2">
                             <label for="address" class="mt-3 md:mt-6">Indirizzo</label>
                             <input type="text" name="address" id="address" maxlength="100" required autocomplete="off"
-                                class="border-1 border-black p-1 rounded-sm focus:outline-2 focus:outline-sky-700 focus:bg-sky-50">
+                                class="border-1 border-black p-1 rounded-sm focus:outline-2 focus:outline-sky-700 focus:bg-sky-50" />
                         </p>
                     </fieldset>
                     <fieldset class="md:grid md:grid-cols-2 md:gap-x-4 min-w-0">
@@ -215,28 +215,28 @@ function mainRegister() {
                         <p class="flex flex-col justify-center">
                             <label for="email" class="mt-3 md:mt-6">Email</label>
                             <input type="email" name="email" id="email" maxlength="100" required autocomplete="off"
-                                class="border-1 border-black p-1 rounded-sm focus:outline-2 focus:outline-sky-700 focus:bg-sky-50">
+                                class="border-1 border-black p-1 rounded-sm focus:outline-2 focus:outline-sky-700 focus:bg-sky-50" />
                         </p>
                         <p class="flex flex-col justify-center">
                             <label for="username" class="mt-3 md:mt-6">Username</label>
                             <input type="text" name="username" id="username" maxlength="100" required autocomplete="off"
-                                class="border-1 border-black p-1 rounded-sm focus:outline-2 focus:outline-sky-700 focus:bg-sky-50">
+                                class="border-1 border-black p-1 rounded-sm focus:outline-2 focus:outline-sky-700 focus:bg-sky-50" />
                         </p>
                         <p class="flex flex-col justify-center">
                             <label for="password" class="mt-3 md:mt-6">Password</label>
                             <input type="password" name="password" id="password" minlength="8" required autocomplete="off"
-                                class="border-1 border-black p-1 rounded-sm focus:outline-2 focus:outline-sky-700 focus:bg-sky-50">
+                                class="border-1 border-black p-1 rounded-sm focus:outline-2 focus:outline-sky-700 focus:bg-sky-50" />
                         </p>
                         <p class="flex flex-col justify-center">
                             <label for="passwordCheck" class="mt-3 md:mt-6">Ripeti la password</label>
                             <input type="password" name="passwordCheck" id="passwordCheck" minlength="8" required autocomplete="off"
-                                class="border-1 border-black p-1 rounded-sm focus:outline-2 focus:outline-sky-700 focus:bg-sky-50">
+                                class="border-1 border-black p-1 rounded-sm focus:outline-2 focus:outline-sky-700 focus:bg-sky-50" />
                         </p>
                     </fieldset>
                     <ul class="hidden list-disc list-inside mt-6 text-red-700 text-clip md:col-span-2">
                     </ul>
                     <input type="submit" name="registrazione" value="Registrati"
-                        class="md:col-span-2 cursor-pointer border-1 border-black mt-6 md:mt-12 mb-3 py-1 rounded-full active:inset-shadow-sm active:inset-shadow-gray-800">
+                        class="md:col-span-2 cursor-pointer border-1 border-black mt-6 md:mt-12 mb-3 py-1 rounded-full active:inset-shadow-sm active:inset-shadow-gray-800" />
                 </form>
             </div>
         </div>`;
@@ -270,9 +270,9 @@ async function mainCatalogo(
                                     const regex = /minPrice=([^&]*)(?:&|$)/;
                                     const match = uriParams.match(regex);
                                     return match && match[1] ? `value="${match[1]}"` : "";
-                                })()}"
+                                })()}
                                 class="border-black border-1 rounded-sm w-24 px-1
-                                [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none">
+                                [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" />
                         </li>
                         <li class="flex flex-row gap-1">
                             <label for="maxPrice">Massimo €</label>
@@ -284,12 +284,12 @@ async function mainCatalogo(
                                     return match && match[1] ? `value="${match[1]}"` : "";
                                 })()}
                                 class="border-black border-1 rounded-sm w-24 px-1
-                                [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none">
+                                [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" />
                         </li>
                         <li class="flex flex-row gap-1">
                             <label for="onlyOffers">Mostra solo offerte</label>
                             <input type="checkbox" name="onlyOffers" id="onlyOffers" class="w-4 accent-ured"
-                            ${uriParams.includes("onlyOffers") ? `checked="true"` : ""}>
+                            ${uriParams.includes("onlyOffers") ? `checked` : ""} />
                         </li>
                     </ul>
                 </fieldset>
@@ -314,7 +314,7 @@ async function mainCatalogo(
                                 `
                                 <li class="flex flex-row gap-2">
                                     <input type="checkbox" name="${category.id}" id="category${category.id}" class="w-4 accent-ured"
-                                     ${previewsCategories.includes((category.id).toString()) ? `checked="true"` : ""}>
+                                     ${previewsCategories.includes((category.id).toString()) ? `checked` : ""} />
                                     <label for="category${category.id}">${category.name}</label>
                                 </li>
                                 `
@@ -328,38 +328,37 @@ async function mainCatalogo(
                     <ul class="flex flex-col gap-y-2">
                         <li>
                             <input type="radio" name="orderBy" id="popularity" value="popularity"
-                            ${uriParams.includes("orderBy=popularity") ? `checked="true"` : ""}
-                            class="w-4 accent-ured">
+                            ${uriParams.includes("orderBy=popularity") ? `checked` : ""}
+                            class="w-4 accent-ured" />
                             <label for="popularity">Popolaritá</label>
                         </li>
                         <li>
                             <input type="radio" name="orderBy" id="decreasingPrice" value="decreasingPrice"
-                            ${uriParams.includes("orderBy=decreasingPrice") ? `checked="true"` : ""}
-                            class="w-4 accent-ured">
+                            ${uriParams.includes("orderBy=decreasingPrice") ? `checked` : ""}
+                            class="w-4 accent-ured" />
                             <label for="decreasingPrice">Prezzo decrescente</label>
                         </li>
                         <li>
                             <input type="radio" name="orderBy" id="increasingPrice" value="increasingPrice"
-                            ${uriParams.includes("orderBy=increasingPrice") ? `checked="true"` : ""}
-                            class="w-4 accent-ured">
+                            ${uriParams.includes("orderBy=increasingPrice") ? `checked` : ""}
+                            class="w-4 accent-ured" />
                             <label for="increasingPrice">Prezzo crescente</label>
                         </li>
                         <li>
                             <input type="radio" name="orderBy" id="random" value="random"
-                            ${uriParams.includes("orderBy=random") ? `checked="true"` : ""}
-                            class="w-4 accent-ured">
+                            ${uriParams.includes("orderBy=random") ? `checked` : ""}
+                            class="w-4 accent-ured" />
                             <label for="random">Casuale</label>
                         </li>
                     </ul>
                 </fieldset>
                 <input type="submit" value="Applica filtri"
-                    class="cursor-pointer border-1 border-gray-500 bg-ulred py-1 rounded-full active:inset-shadow-sm active:inset-shadow-gray-800">
+                    class="cursor-pointer border-1 border-gray-500 bg-ulred py-1 rounded-full active:inset-shadow-sm active:inset-shadow-gray-800" />
                 <input type="reset" value="Reimposta filtri"
-                    class="cursor-pointer border-1 border-gray-500 py-1 rounded-full active:inset-shadow-sm active:inset-shadow-gray-800">
+                    class="cursor-pointer border-1 border-gray-500 py-1 rounded-full active:inset-shadow-sm active:inset-shadow-gray-800" />
             </form>
         </aside>
-        <!-- Sezione ricerca a visualizzazione multipagina prodotti -->
-        <section class="w-full flex flex-col gap-5">
+        <div class="w-full flex flex-col gap-5">
             <header class="flex flex-col md:flex-row gap-5">
                 <form action="cerca" class="flex flex-col md:flex-row md:items-center md:gap-2 md:grow">
                     <label for="search">Cerca per nome/descrizione</label>
@@ -367,12 +366,12 @@ async function mainCatalogo(
                         <input type="search" name="search" id="search" autocomplete="off"
                             ${(() => {
                                 const match = uriParams.match(/search=([^&]+)(?:&|$)/);
-                                return match && match[1] ? `value="${match[1]}"` : "";
+                                return match && match[1] ? `value="${match[1]}"` : " ";
                             })()}
                             class="w-full rounded-l-full px-3 py-1 border-1 border-r-0 border-gray-400"
                             placeholder="Nome prodotto / descrizione prodotto" />
                         <input type="submit" value="Cerca" class="cursor-pointer rounded-r-full px-4 py-1 border-1 border-l-0 border-ured
-                            bg-ured active:inset-shadow-sm active:inset-shadow-gray-800 font-medium">
+                            bg-ured active:inset-shadow-sm active:inset-shadow-gray-800 font-medium" />
                     </div>
                 </form>
                 ${(() => {
@@ -383,7 +382,7 @@ async function mainCatalogo(
                         <a href="CRUDProduct" class="flex flex-row justify-center items-center gap-2
                         font-semibold bg-ugreen py-2 md:px-3 rounded-full text-center active:inset-shadow-sm active:inset-shadow-gray-800">
                             Aggiungi prodotto
-                            <img src="assets/icons/add.png" class="w-4 h-4">
+                            <img src="assets/icons/add.png" class="w-4 h-4" />
                         </a>
                         `
                     }
@@ -414,13 +413,14 @@ async function mainCatalogo(
                             activePage == i ? "bg-ulred" : ""
                             } font-semibold text-xl py-2 px-4 ${
                             i < totalPages ? "border-r-1" : "" }">${i}</a>
-                        <li>`;
+                        </li>`;
                     }
+                    console.log(numbers);
                     return numbers;
                 })()} 
                 </ul>
             </footer>
-        </section>
+        </div>
     </div>`;
 }
 
@@ -457,7 +457,7 @@ async function mainCRUDProduct(productID = null) {
                             <li>
                                 <div class="flex flex-row items-center gap-2">
                                     <label for="title">Titolo</label>
-                                    <img src="assets/icons/required.png" alt="campo obbligatorio" class="w-4 h-4">
+                                    <img src="assets/icons/required.png" alt="campo obbligatorio" class="w-4 h-4" />
                                 </div>
                                 <input type="text" name="title" id="title" required autocomplete="off" maxlength="255"
                                     ${(() => {
@@ -470,7 +470,7 @@ async function mainCRUDProduct(productID = null) {
                             <li>
                                 <div class="flex flex-row items-center gap-2">
                                     <label for="description">Descrizione</label>
-                                    <img src="assets/icons/required.png" alt="campo obbligatorio" class="w-4 h-4">
+                                    <img src="assets/icons/required.png" alt="campo obbligatorio" class="w-4 h-4" />
                                 </div>
                                 <textarea name="description" id="description" required autocomplete="off" maxlength="10000"
                                     class="border-1 border-black p-1 rounded-sm focus:outline-2 focus:outline-sky-700 focus:bg-sky-50 resize-none h-100 overscroll-y-contain w-full"
@@ -488,7 +488,7 @@ async function mainCRUDProduct(productID = null) {
                             <li>
                                 <div class="flex flex-row items-center gap-2">
                                     <label for="price">Prezzo intero in €</label>
-                                    <img src="assets/icons/required.png" alt="campo obbligatorio" class="w-4 h-4">
+                                    <img src="assets/icons/required.png" alt="campo obbligatorio" class="w-4 h-4" />
                                 </div>
                                 <input type="number" name="price" id="price" required autocomplete="off" min="0.01" max="99999999.99" step=".01" 
                                     ${(() => {
@@ -519,7 +519,7 @@ async function mainCRUDProduct(productID = null) {
                                 e quelle
                                 nuove</strong>
                             <img src="assets/icons/required.png" alt="categoria obbligatoria"
-                                class="w-4 h-4 self-center md:justify-self-start">
+                                class="w-4 h-4 self-center md:justify-self-start" />
                         </div>
                         <ul class="grid grid-cols-2 md:grid-cols-3 gap-y-2">
                         ${await (async () => {
@@ -531,7 +531,7 @@ async function mainCRUDProduct(productID = null) {
                                 <li class="flex flex-row gap-2">
                                     <input type="checkbox" name="${category.id}" id="category${category.id}" 
                                     ${productData && productData.success && (productData.product.category_ids).includes(category.id.toString())
-                                        ? 'checked="true"'
+                                        ? 'checked'
                                         : ""} class="w-4 accent-ured" />
                                     <label for="category${category.id}">${category.name}</label>
                                 </li>
@@ -549,7 +549,7 @@ async function mainCRUDProduct(productID = null) {
                             <li>
                                 <div class="flex flex-row items-center gap-2">
                                     <label for="quantity">Quantitá</label>
-                                    <img src="assets/icons/required.png" alt="campo obbligatorio" class="w-4 h-4">
+                                    <img src="assets/icons/required.png" alt="campo obbligatorio" class="w-4 h-4" />
                                 </div>
                                 <input type="number" name="quantity" id="quantity" required autocomplete="off" min="1" max="99999999" step="1" 
                                     ${(() => {
@@ -574,14 +574,14 @@ async function mainCRUDProduct(productID = null) {
                                     productData && productData.success
                                         ? ""
                                         : "required"
-                                    } autocomplete="off" maxlength="255" 
+                                    } 
                                     class="border-1 border-black p-1 rounded-sm focus:outline-2 focus:outline-sky-700 focus:bg-sky-50 w-full"
                                     accept=".jpg, .jpeg, .png" />
                             </li>
                         </ul>
                     </fieldset>
                     <div class="flex flex-row items-center gap-2">
-                        <img src="assets/icons/required.png" alt="campo obbligatorio" class="w-4 h-4">
+                        <img src="assets/icons/required.png" alt="campo obbligatorio" class="w-4 h-4" />
                         <strong>= CAMPO OBBLIGATORIO</strong>
                     </div>
                     <ul class="hidden list-disc list-inside mt-6 text-red-700 text-clip md:col-span-2">
@@ -652,8 +652,7 @@ async function mainProductSheet(productID) {
         <header>
             <h1 class="font-bold text-lg text-center">${product.title}</h1>
         </header>
-        <!-- informative section about the product -->
-        <section class="flex flex-col justify-center">
+        <div class="flex flex-col justify-center">
             <div class="flex flex-col md:flex-row md:items-center justify-center gap-5">
                 <!-- image -->
                 <img src="assets/prod/${product.image_name}" alt="${product.title}"
@@ -688,7 +687,7 @@ async function mainProductSheet(productID) {
                     </section>
                 </div>
             </div>
-        </section>
+        </div>
         <footer class="${USER_INFO.loggedIn ? "flex" : "hidden"} flex-col md:flex-row justify-center items-center flex-1">
         ${(() => {
             if (USER_INFO.loggedIn && USER_INFO.user.isCustomer) {
@@ -698,16 +697,16 @@ async function mainProductSheet(productID) {
                         <legend class="h-0 invisible">Dettagli d'acquisto</legend>
                         <label for="purchaseQuantity" class="font-medium">Quantitá d'acquisto</label>
                         <input type="number" name="purchaseQuantity" id="purchaseQuantity" min="1" max="${product.quantity_available}" value="1"
-                            class="border-1 border-black px-1 w-20 rounded-md bg-white">
+                            class="border-1 border-black px-1 w-20 rounded-md bg-white" />
                     </fieldset>
                     <input type="submit" value="Aggiungi al carrello" name="add#${product.id}"
-                        class="cursor-pointer px-4 py-2 border-2 border-black rounded-full bg-white font-medium active:inset-shadow-sm active:inset-shadow-gray-800">
+                        class="cursor-pointer px-4 py-2 border-2 border-black rounded-full bg-white font-medium active:inset-shadow-sm active:inset-shadow-gray-800" />
                 </form>`;
             } else if (USER_INFO.loggedIn && !USER_INFO.isCustomer) {
                return `<a class="flex items-center justify-center gap-2 border-black border-1 w-full py-1 mt-2 rounded-full
                         active:inset-shadow-sm active:inset-shadow-gray-800 bg-ulorange md:w-1/3"
                             href="updateProduct#${productID}">
-                            <img class="w-5 h-5 aspect-square" src="assets/icons/edit.png" alt="">
+                            <img class="w-5 h-5 aspect-square" src="assets/icons/edit.png" alt="" />
                             Modifica prodotto
                         </a>`;
             }
@@ -786,7 +785,7 @@ async function mainCarrello() {
                                         <img class="min-w-20 w-auto md:max-h-40" src="assets/prod/${product.image_name}" alt="${product.title}" />
                                     </header>
                                     <section class="flex flex-col px-1 gap-3">
-                                        <h3 class="font-semibold">${product.title}<h3>
+                                        <h3 class="font-semibold">${product.title}</h3>
                                         <p>${shortenDescription(product.description)}</p>
                                         <p class="mt-3">
                                         <strong>Prezzo totale:</strong> €${(product.inCart * (product.discount_price ? product.discount_price : product.price)).toFixed(2)}<br/>
@@ -799,14 +798,14 @@ async function mainCarrello() {
                                         <li class="flex flex-row w-full">
                                             <a class="grow flex items-center justify-center gap-2 border-black border-1 w-full py-1 px-2 rounded-full active:inset-shadow-sm active:inset-shadow-gray-800"
                                                 href="productSheet#${product.id}">
-                                                <img class="w-5 h-5 aspect-square" src="assets/icons/info.png" alt="">
+                                                <img class="w-5 h-5 aspect-square" src="assets/icons/info.png" alt="" />
                                                 Scheda prodotto
                                             </a>
                                         <li>
                                         <li class="flex flex-row w-full">
                                             <a class="grow flex items-center justify-center gap-2 border-red-700 text-red-700 border-1 w-full py-1 px-2 rounded-full active:inset-shadow-sm active:inset-shadow-gray-800"
                                                 href="deleteFromCart#${product.id}">
-                                                <img class="w-5 h-5 aspect-square" src="assets/icons/remove.png" alt="">
+                                                <img class="w-5 h-5 aspect-square" src="assets/icons/remove.png" alt="" />
                                                 Rimuovi dal carrello
                                             </a>
                                         <li>
@@ -885,7 +884,7 @@ async function mainCompleteOrder() {
                         </ul>
                     </fieldset>
                     <input type="submit" value="Ordina e paga"
-                        class="cursor-pointer font-semibold px-3 py-2 border-1 border-black bg-ugreen rounded-full mt-5 active:inset-shadow-sm active:inset-shadow-gray-800">
+                        class="cursor-pointer font-semibold px-3 py-2 border-1 border-black bg-ugreen rounded-full mt-5 active:inset-shadow-sm active:inset-shadow-gray-800" />
                 </form>
             </div>
         </div>`;
@@ -917,7 +916,7 @@ async function mainOrdini() {
                                 let prevImgs = "";
                                 for (let i = 0; i < 4 && i < orderItems.length; i++) {
                                     prevImgs += `<li class="max-w-10 max-h-10">
-                                        <img src="assets/prod/${orderItems[i].image_name}" alt="${orderItems[i].title}">
+                                        <img src="assets/prod/${orderItems[i].image_name}" alt="${orderItems[i].title}" />
                                     </li>`;
                                 }
                                 return prevImgs;
@@ -940,7 +939,7 @@ async function mainOrdini() {
                             <a href="expandDetails"
                                 class="text-black self-center h-10 flex flex-row justify-center items-center gap-2 px-10 py-2 border-2 border-black bg-white rounded-full w-full md:w-auto">
                                 <p class="text-nowrap">Apri/Chiudi dettagli</p>
-                                <img src="assets/icons/down-arrow.png" alt="" class="w-4 h-4">
+                                <img src="assets/icons/down-arrow.png" alt="" class="w-4 h-4" />
                             </a>
                         </div>
                     </header>
@@ -988,7 +987,7 @@ async function mainOrdini() {
                                                 src="assets/prod/${product.image_name}" alt="${product.title}" />
                                         </header>
                                         <section class="flex flex-col px-1 gap-3">
-                                            <h4 class="font-semibold">${product.title}<h4>
+                                            <h4 class="font-semibold">${product.title}</h4>
                                                     <p>${shortenDescription(product.description)}</p>
                                                     <p class="mt-3">
                                                         <strong>Prezzo totale:</strong> €${(product.quantity * product.price_per_unit).toFixed(2)}<br />
@@ -1002,10 +1001,10 @@ async function mainOrdini() {
                                                 <a class="grow flex items-center justify-center gap-2 border-black border-1 w-full py-1 px-2 rounded-full active:inset-shadow-sm active:inset-shadow-gray-800"
                                                     href="productSheet#${product.id}">
                                                     <img class="w-5 h-5 aspect-square" src="assets/icons/info.png"
-                                                        alt="">
+                                                        alt="" />
                                                     Scheda prodotto
                                                 </a>
-                                            <li>
+                                            </li>
                                         </ul>
                                     </footer>
                                 </article>`;
@@ -1046,14 +1045,14 @@ async function mainOrdini() {
                                                         today = new Date(today.setDate(today.getDate() + 1)).toISOString().split('T')[0];
                                                         return today;
                                                         })()}" value="${order.delivery_date ? order.delivery_date.split(" ")[0] : ""}"
-                                                         class="border-1 border-black p-1 rounded-sm focus:outline-2 focus:outline-sky-700 focus:bg-sky-50 w-8"/>
+                                                         class="border-1 border-black p-1 rounded-sm focus:outline-2 focus:outline-sky-700 focus:bg-sky-50 w-8" />
                                                     <label for="deliveryDate#${order.id}">${order.delivery_date ? formatMySQLTimestamp(order.delivery_date) : ""}</label>
                                                 </li>
                                             </ul>
                                         </fieldset>
                                         <div class="flex flex-col md:flex-row gap-3">
-                                            <input type="submit" value="Cambia stato e data di consegna" name="${order.id}" class="p-2 border-1 border-black bg-ugreen rounded-full grow active:inset-shadow-sm active:inset-shadow-gray-800 cursor-pointer text-center"/>
-                                            <input type="reset" value="Reimposta stato e data di consegna" class="p-2 border-1 border-black bg-ulred rounded-full grow active:inset-shadow-sm active:inset-shadow-gray-800 cursor-pointer text-center"/>
+                                            <input type="submit" value="Cambia stato e data di consegna" name="${order.id}" class="p-2 border-1 border-black bg-ugreen rounded-full grow active:inset-shadow-sm active:inset-shadow-gray-800 cursor-pointer text-center" />
+                                            <input type="reset" value="Reimposta stato e data di consegna" class="p-2 border-1 border-black bg-ulred rounded-full grow active:inset-shadow-sm active:inset-shadow-gray-800 cursor-pointer text-center" />
                                         </div>
                                     </form>
                                 </footer>`
@@ -1086,7 +1085,7 @@ async function mainNotifiche() {
                 </div>
             </div>
             <!-- Actual notifications -->
-            <section class="border-1 border-gray-500 shadow-lg rounded-md overflow-hidden">
+            <div class="border-1 border-gray-500 shadow-lg rounded-md overflow-hidden">
                 <ul class="flex flex-col divide-y-2 divide-dashed">
                 ${(() => {
                     if (notifications.length == 0) {
@@ -1122,7 +1121,7 @@ async function mainNotifiche() {
                     return notificationsHTML;
                 })()}
                 </ul>
-            </section>
+            </div>
         </div>`;
 }
 
@@ -1183,12 +1182,12 @@ async function mainContatti() {
                             </li>
                             <li class="flex flex-col gap-1">
                                 <label for="title" class="font-semibold">Titolo del messaggio</label>
-                                <input type="text" name="title" id="title" required maxlength="255" 
+                                <input type="text" name="title" id="title" required maxlength="255" autocomplete="off" 
                                     class="bg-white border-1 border-sky-900 p-1 rounded-sm focus:outline-2 focus:outline-orange-900" />
                             </li>
                             <li class="flex flex-col gap-1">
                                 <label for="message" class="font-semibold">Messaggio</label>
-                                <textarea name="message" id="message" required maxlength="5000" 
+                                <textarea name="message" id="message" required maxlength="5000" autocomplete="off" 
                                     class="bg-white h-80 resize-none border-1 border-sky-900 p-1 rounded-sm focus:outline-2 focus:outline-orange-900"></textarea>
                             </li>
                         </ul>

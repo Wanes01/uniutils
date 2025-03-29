@@ -28,9 +28,8 @@
     <main class="pt-14">
 
     </main>
-    <footer class="flex flex-col gap-2 items-center justify-center bg-ublue py-2">
+    <footer class="flex flex-col gap-2 items-center justify-center bg-ublue py-6">
         <img src="assets/imgs/logo_white.png" alt="UniUtils" class="w-36" />
-        <a href="#" class="text-white">Informativa sui cookie</a>
     </footer>
     <!-- Script injection -->
     <?php foreach ($params["scripts"] as $script): ?>
