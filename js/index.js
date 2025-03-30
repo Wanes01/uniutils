@@ -46,25 +46,28 @@ const CATALOGO_CONSTANTS = {
 }
 
 /*
-POPUP HANDLERS
+NAV POPUP HANDLERS
 */
-const popupMenuIcon = document.querySelector("body header nav img:last-child");
+const popupMenuBtn = document.querySelector("body header div img");
 const popupMenu = document.querySelector("body header nav:last-child");
 
-popupMenuIcon.addEventListener('click', () => {
-    if(popupMenu.classList.contains("hidden")) { // menú is closed
-        popupMenu.classList.remove("hidden");
-        popupMenu.classList.add("animate-open");
-        popupMenuIcon.src = "assets/icons/close.png";
-    } else {
-        popupMenu.classList.add("hidden");
-        popupMenuIcon.src = "assets/icons/menu.png";
+popupMenuBtn.addEventListener('click', () => {
+    const isVisible = swapElementClasses(popupMenu, "hidden", "flex");
+    popupMenuBtn.src = `assets/icons/${isVisible ? "close" : "menu"}.png`;
+
+    popupMenuBtn.setAttribute("aria-expanded", isVisible);
+    popupMenu.setAttribute("aria-hidden", !isVisible);
+
+    if (isVisible) {
+        popupMenu.querySelector("ul li a").focus();
     }
 });
 
 popupMenu.addEventListener('click', () => {
     popupMenu.classList.add("hidden");
-    popupMenuIcon.src = "assets/icons/menu.png";
+    popupMenuBtn.src = "assets/icons/menu.png";
+    popupMenuBtn.setAttribute("aria-expanded", false);
+    popupMenu.setAttribute("aria-hidden", true);
 });
 
 /* 
@@ -101,18 +104,17 @@ document.body.addEventListener('click', async function(e) {
     const link = e.target.closest("a");
     const submit = e.target.closest("form input[type='submit']");
 
+    // expands/retract order details
     if (e.target.closest("a[href='expandDetails']")) {
         const detailsBox = (e.target.closest("a[href='expandDetails']").parentNode.parentNode).nextSibling.nextElementSibling;
         const downArrow = (e.target.closest("a[href='expandDetails']")).children[1];
-        if (detailsBox.classList.contains("hidden")) {
-            downArrow.src = "assets/icons/up-arrow.png";
-            detailsBox.classList.remove("hidden");
-            detailsBox.classList.add("flex");
-        } else {
-            downArrow.src = "assets/icons/down-arrow.png";
-            detailsBox.classList.remove("flex");
-            detailsBox.classList.add("hidden");
-        }
+        const btn = e.target.closest("a[href='expandDetails']");
+
+        const isVisible = swapElementClasses(detailsBox, "hidden", "flex");
+        downArrow.src = `assets/icons/${isVisible ? "up-arrow" : "down-arrow"}.png`;
+
+        btn.setAttribute("aria-expanded", isVisible);
+        detailsBox.setAttribute("aria-hidden", !isVisible);
         return;
     }
 
@@ -121,24 +123,20 @@ document.body.addEventListener('click', async function(e) {
     for the "md" breakpoint, matching devices larger than tablets */
     if (e.target.closest("div aside div")
     && document.documentElement.clientWidth < 768) {
+        const btn = e.target.closest("div aside div");
         const filterForm = document.querySelector("form");
         const arrowIcon = document.querySelector("div aside div img");
-        filterForm.classList.add("animate-open");
-        // opens the filter menu
-        if (filterForm.classList.contains("hidden")) {
-            filterForm.classList.remove("hidden");
-            filterForm.classList.add("flex");
-            arrowIcon.classList.add("rotate-180");
-        // closes the filter menu
-        } else {
-            filterForm.classList.remove("flex");
-            filterForm.classList.add("hidden");
-            arrowIcon.classList.remove("rotate-180");
+
+        const isVisible = swapElementClasses(filterForm, "hidden", "flex");
+        arrowIcon.src = `assets/icons/${isVisible ? "up-arrow" : "down-arrow"}.png`;
+        
+        btn.setAttribute("aria-expanded", isVisible);
+        filterForm.setAttribute("aria-hidden", !isVisible);
+
+        if (isVisible) {
+            filterForm.querySelector("input").focus();
         }
-        return;
-    } else if (e.target.closest("div aside div")
-        && document.documentElement.clientWidth >= 768) {
-            filterForm.classList.remove("animate-open");
+
         return;
     }
 

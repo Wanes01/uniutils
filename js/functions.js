@@ -69,6 +69,7 @@ async function registerSubmitter(formData, errorList) {
             errLine.innerText = err;
             errorList.appendChild(errLine);
         });
+        errorList.focus();
         return;
     }
     // The registration was successfull. Redirects the user to the login
@@ -93,6 +94,7 @@ async function loginSubmitter(formData, errorList) {
         const errLine = document.createElement("li");
         errLine.innerText = response.message;
         errorList.appendChild(errLine);
+        errorList.focus();
         return;
     }
     USER_INFO = await getUserInfo();
@@ -234,6 +236,7 @@ async function productCRUDSubmitter(formData, errorList, CRUDAction) {
             errLine.innerText = err;
             errorList.appendChild(errLine);
         });
+        errorList.focus();
         return;
     }
 
@@ -369,9 +372,23 @@ async function sendNotificationSubmitter(formData, errorList) {
             errLine.innerText = err;
             errorList.appendChild(errLine);
         });
+        errorList.focus();
         return;
     }
 
     await showDisappearingInfoModal("✅ La notifica é stata correttamente inviata!", 2000);
     fillMain(mainContatti);
+}
+
+/* Swaps the two classes if the specified DOM element.
+Returns true if the firstClass was set, false otherwise */
+function swapElementClasses(element, firstClass, secondClass) {
+    if (element.classList.contains(firstClass)) {
+        element.classList.remove(firstClass);
+        element.classList.add(secondClass);
+        return true;
+    }
+    element.classList.remove(secondClass);
+    element.classList.add(firstClass);
+    return false;
 }

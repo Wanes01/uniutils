@@ -7,13 +7,14 @@ function generateProductPreview(productData, wClass, heading) {
     for (let i = 0; i < productData.length; i++) {
         products.push(
         `<article
-            class="flex flex-row md:flex-col gap-2 border-1 ${wClass} border-gray-400 shadow-md shadow-gray-500 py-2 px-2 rounded-sm">
+            aria-labelledby="article-title${productData[i].id}" class="flex flex-row md:flex-col gap-2 border-1 ${wClass} border-gray-400 shadow-md shadow-gray-500 py-2 px-2 rounded-sm">
             <header class="flex items-center justify-center basis-1/3">
                 <img class="w-auto md:max-h-40" src="${productData[i].image_name}" alt="${productData[i].title}" />
             </header>
             <div class="flex flex-col w-full grow">
                 <section>
-                    <${heading} class="font-bold">${productData[i].title}</${heading}>
+                    <!-- id for aria-label -->
+                    <${heading} id="article-title${productData[i].id}" class="font-bold">${productData[i].title}</${heading}>
                     <p class="font-semibold">€${productData[i].discount_price ? productData[i].discount_price : productData[i].price} <del class="text-red-800">${
                         productData[i].discount_price != null ? "€" + productData[i].price : ""
                     }</del>${
@@ -164,7 +165,7 @@ function mainLogin() {
                             <input type="password" name="password" id="password" required autocomplete="off"
                                 class="border-1 border-black p-1 rounded-sm focus:outline-2 focus:outline-sky-700 focus:bg-sky-50" />
                         </fieldset>
-                        <ul class="hidden list-disc list-inside mt-6 text-red-700 text-clip md:col-span-2">
+                        <ul aria-live="assertive" tabindex="-1" class="hidden list-disc list-inside mt-6 text-red-700 text-clip md:col-span-2">
                         </ul>
                         <input type="submit" name="login" value="Accedi"
                             class="cursor-pointer border-1 border-black mt-6 md:mt-12 mb-3 py-1 rounded-full active:inset-shadow-sm active:inset-shadow-gray-800" />
@@ -233,7 +234,7 @@ function mainRegister() {
                                 class="border-1 border-black p-1 rounded-sm focus:outline-2 focus:outline-sky-700 focus:bg-sky-50" />
                         </p>
                     </fieldset>
-                    <ul class="hidden list-disc list-inside mt-6 text-red-700 text-clip md:col-span-2">
+                    <ul aria-live="assertive" tabindex="-1" class="hidden list-disc list-inside mt-6 text-red-700 text-clip md:col-span-2">
                     </ul>
                     <input type="submit" name="registrazione" value="Registrati"
                         class="md:col-span-2 cursor-pointer border-1 border-black mt-6 md:mt-12 mb-3 py-1 rounded-full active:inset-shadow-sm active:inset-shadow-gray-800" />
@@ -252,13 +253,14 @@ async function mainCatalogo(
     <div class="flex flex-col md:flex-row m-2 md:ml-2 md:mr-5 gap-5">
         <!-- Sidebar con i filtri di ricerca -->
         <aside class="border-gray-400 border-1 md:border-0 rounded-md px-2 py-1 md:w-7/24">
-            <div class="flex flex-row items-center justify-center gap-3">
+            <!-- can be clicked to expand on mobile viewport -->
+            <div id="toggleFilters" tabindex="0" aria-expanded="false" aria-controls="filtersPanel" class="flex flex-row items-center justify-center gap-3">
                 <h2 class="font-semibold text-center md:text-lg">Filtri</h2>
                 <img src="assets/icons/down-arrow.png" alt="Apri/chiudi filtri"
-                class="w-4 h-4 md:hidden transition duration-300 z-10" />
+                class="w-4 h-4 md:hidden" />
             </div>
             <!-- flex / hidden (hidden in versione mobile) -->
-            <form action="filtra" class="px-2 py-1 hidden md:flex flex-col gap-5">
+            <form id="filtersPanel" aria-hidden="true" action="filtra" class="px-2 py-1 hidden md:flex flex-col gap-5">
                 <fieldset class="border border-solid border-gray-400 p-3 rounded-sm">
                     <legend class="font-medium">Prezzo</legend>
                     <ul class="flex flex-col gap-2">
@@ -424,21 +426,6 @@ async function mainCatalogo(
     </div>`;
 }
 
-async function showDisappearingInfoModal(message, time) {
-    const div = document.querySelector("main > div");
-    div.classList.add("blur-sm");
-    document.querySelector("main").innerHTML +=
-    `
-    <div class="fixed top-1/2 left-1/2 z-50 transform -translate-x-1/2 -translate-y-1/2
-    py-8 px-10 text-center rounded-md bg-white border-1 border-gray-400 flex flex-row font-medium
-    shadow-xl shadow-gray-800">
-        <p>${message}</p>
-    </div>
-    `
-    await sleep(time);
-    //div.classList.remove("blur-sm");
-}
-
 async function mainCRUDProduct(productID = null) {
     // data used to fill the form for product update
     const productData = productID
@@ -584,7 +571,7 @@ async function mainCRUDProduct(productID = null) {
                         <img src="assets/icons/required.png" alt="campo obbligatorio" class="w-4 h-4" />
                         <strong>= CAMPO OBBLIGATORIO</strong>
                     </div>
-                    <ul class="hidden list-disc list-inside mt-6 text-red-700 text-clip md:col-span-2">
+                    <ul aria-live="assertive" tabindex="-1" class="hidden list-disc list-inside mt-6 text-red-700 text-clip md:col-span-2">
                     </ul>
                     <footer class="flex flex-col md:flex-row gap-3">
                         ${(() => {
@@ -604,6 +591,28 @@ async function mainCRUDProduct(productID = null) {
     `
 }
 
+async function showDisappearingInfoModal(message, time) {
+    const div = document.querySelector("main > div");
+    div.classList.add("blur-sm");
+
+    const modal = document.createElement("div");
+    // aria attributes for accessibility
+    modal.setAttribute("role", "dialog");
+    modal.setAttribute("aria-modal", "true");
+    modal.setAttribute("aria-describedby", "popupDesc");
+
+    modal.className = `fixed top-1/2 left-1/2 z-50 transform -translate-x-1/2 -translate-y-1/2
+    py-8 px-10 text-center rounded-md bg-white border-1 border-gray-400 flex flex-row font-medium
+    shadow-xl shadow-gray-800`;
+    modal.innerHTML = `<p id="popupDesc" tabindex="-1">${message}</p>`;
+    
+    document.querySelector("main").appendChild(modal);
+    modal.querySelector("p").focus();
+
+    await sleep(time);
+    div.classList.remove("blur-sm");
+}
+
 async function showConfirmationModal(message, agreeMessage, disagreeMessage) {
     return new Promise((resolve) => {
         const main = document.querySelector("main");
@@ -612,10 +621,15 @@ async function showConfirmationModal(message, agreeMessage, disagreeMessage) {
     
         // Creazione del modal
         const modal = document.createElement("div");
+        // aria attributes for accessibility
+        modal.setAttribute("role", "dialog");
+        modal.setAttribute("aria-modal", "true");
+        modal.setAttribute("aria-describedby", "popupDesc");
+
         modal.className = `fixed top-1/2 left-1/2 z-50 transform -translate-x-1/2 -translate-y-1/2
             py-8 px-10 text-center rounded-md bg-white border-1 border-gray-400 flex flex-col font-medium justify-center items-center
             shadow-xl shadow-gray-800`;
-        modal.innerHTML = `<p class="text-red-700 font-semibold">${message}</p>
+        modal.innerHTML = `<p id="popupDesc" tabindex="-1" class="text-red-700 font-semibold">${message}</p>
             <div class="flex flex-col md:flex-row gap-4 mt-6">
                 <button class="cursor-pointer px-6 py-2 border-3 border-green-700 text-green-700 bg-green-100 rounded-full grow 
                 active:inset-shadow-sm active:inset-shadow-gray-800">${agreeMessage}</button>
@@ -624,6 +638,7 @@ async function showConfirmationModal(message, agreeMessage, disagreeMessage) {
             </div>`;
             
         main.appendChild(modal);
+        modal.querySelector("p").focus();
     
         // AGREE BUTTON HANDLER
         document.querySelector("button:nth-child(1)").addEventListener('click', function() {
@@ -638,8 +653,8 @@ async function showConfirmationModal(message, agreeMessage, disagreeMessage) {
         });
     
         function closeModal() {
-            modal.remove(); // Rimuove il modal
-            div.classList.remove("blur-sm"); // Rimuove l'effetto sfocato
+            modal.remove();
+            div.classList.remove("blur-sm");
         }
     });
 }
@@ -936,14 +951,15 @@ async function mainOrdini() {
                                 </li>`
                                 : ""}
                             </ul>
-                            <a href="expandDetails"
+                            <a href="expandDetails" id="toggleOrder${order.id}" aria-expanded="false" aria-controls="orderDetails${order.id}"
                                 class="text-black self-center h-10 flex flex-row justify-center items-center gap-2 px-10 py-2 border-2 border-black bg-white rounded-full w-full md:w-auto">
                                 <p class="text-nowrap">Apri/Chiudi dettagli</p>
                                 <img src="assets/icons/down-arrow.png" alt="" class="w-4 h-4" />
                             </a>
                         </div>
                     </header>
-                    <div class="hidden animate-open flex-col gap-4 ${ordNum % 2 == 0 ? "bg-orange-100" : "bg-blue-100"} md:px-10 md:py-4 px-3 py-5 border-t-3 border-dashed">
+                    <!-- expandable details -->
+                    <div id="orderDetails${order.id}" aria-hidden="true" class="hidden animate-open flex-col gap-4 ${ordNum % 2 == 0 ? "bg-orange-100" : "bg-blue-100"} md:px-10 md:py-4 px-3 py-5 border-t-3 border-dashed">
                         <section class="flex flex-col gap-3 border-1 border-black p-2 bg-white rounded-md">
                             <h3 class="font-bold underline text-center">Dettagli</h3>
                             <ul>
@@ -1089,7 +1105,7 @@ async function mainNotifiche() {
                 <ul class="flex flex-col divide-y-2 divide-dashed">
                 ${(() => {
                     if (notifications.length == 0) {
-                        return `<p class="text-2xl text-center my-6">Non hai nessuna notifica 📩</p>`;
+                        return `<p class="text-2xl text-center my-6">Non hai alcuna notifica 📩</p>`;
                     }
 
                     let notificationsHTML = "";
@@ -1192,7 +1208,7 @@ async function mainContatti() {
                             </li>
                         </ul>
                     </fieldset>
-                    <ul class="hidden list-disc list-inside mt-6 text-red-800 text-clip md:col-span-2">
+                    <ul aria-live="assertive" tabindex="-1" class="hidden list-disc list-inside mt-6 text-red-800 text-clip md:col-span-2">
                     </ul>
                     <input type="submit" value="Manda notifica"
                         class="cursor-pointer mt-6 py-1 px-2 border-2 border-orange-900 border-solid rounded-md text-orange-900 font-semibold active:inset-shadow-sm active:inset-shadow-gray-800 bg-orange-100" />

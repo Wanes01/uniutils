@@ -14,13 +14,13 @@
             <img src="assets/imgs/logo_orange.png" alt="UniUtils" class="w-40 ml-3" />
         </a>
         <!-- navigazione mobile -->
-        <nav class="md:hidden flex flex-row flex-1 items-center justify-end gap-4 mr-3" aria-label="notifiche e menú">
+        <div class="md:hidden flex flex-row flex-1 items-center justify-end gap-4 mr-3">
             <!-- Menú ad hamburger -->
-            <img src="assets/icons/menu.png" alt="Menú" class="w-6 h-6 cursor-pointer" />
-        </nav>
+            <img tabindex="0" id="menuToggle" aria-expanded="false" aria-controls="menuPanel" src="assets/icons/menu.png" alt="Apri/chiudi menú di navigazione" class="w-6 h-6 cursor-pointer" />
+        </div>
         <!-- navigazione a scomparsa -->
-        <nav class="hidden bg-white w-full md:flex md:flex-1">
-            <ul class="md:flex md:flex-row md:flex-1 md:items-center md:justify-end md:gap-3 md:mr-3 z-50">
+        <nav id="menuPanel" aria-hidden="true" class="hidden animate-open md:animate-none bg-white w-full md:flex md:flex-1">
+            <ul class="md:flex md:flex-row w-full md:flex-1 md:items-center md:justify-end md:gap-3 md:mr-3 z-50">
                 
             </ul>
         </nav>
