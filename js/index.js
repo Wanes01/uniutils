@@ -74,6 +74,18 @@ popupMenu.addEventListener('click', () => {
 LINK HANDLERS 
 */
 
+
+/* translates all the Enter key press as a click on the current active element.
+The behavior associated with the click is described in the body click handler
+*/
+document.body.addEventListener('keydown', async function(e) {
+    if (e.key === "Enter") {
+        e.preventDefault();
+        const activeElement = document.activeElement;
+        activeElement.click();
+    }
+});
+
 /* All links in the main are generated dynamically, which means that you cannot attach
 an event handler to them when the page loads. The function below performs an action by
 delegating to the body when a click on a link is detected or a form is submitted. */

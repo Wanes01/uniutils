@@ -392,3 +392,8 @@ function swapElementClasses(element, firstClass, secondClass) {
     element.classList.add(firstClass);
     return false;
 }
+
+function changePreviewCartPrice(quantity, price) {
+    const preview = document.querySelector("div form p");
+    preview.innerHTML = `Prezzo bloccato nel carrello: €${(quantity * price).toFixed(2)}`;
+}

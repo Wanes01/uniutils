@@ -667,34 +667,34 @@ async function mainProductSheet(productID) {
     const product = (await apiCaller(`product-by-id.php?id=${productID}`)).product;
     return `
     <div class="w-full">
-    <article class="flex flex-col gap-3 border-1 border-black m-2 p-4 rounded-lg md:min-h-[80vh]">
+    <article class="flex flex-col gap-3 m-2 p-4 rounded-lg md:min-h-[80vh]">
         <header>
-            <h1 class="font-bold text-lg text-center">${product.title}</h1>
+            <h1 class="font-bold text-xl text-center">${product.title}</h1>
         </header>
-        <div class="flex flex-col justify-center">
-            <div class="flex flex-col md:flex-row md:items-center justify-center gap-5">
+        <div class="flex flex-col justify-center mt-6">
+            <div class="flex flex-col md:flex-row md:items-center justify-center gap-5 md:gap-30">
                 <!-- image -->
                 <img src="assets/prod/${product.image_name}" alt="${product.title}"
                     class="max-h-96 max-w-full object-contain text-center" />
                 <!-- description -->
-                <div class="flex flex-col gap-2 md:gap-10">
-                    <section class="flex flex-col gap-2 p-2 md:py-10 border-b-2 border-red-800">
-                        <h2 class="font-bold">Descrizione</h2>
+                <div class="flex flex-col gap-5 md:gap-10">
+                    <section class="flex flex-col gap-2 p-2 md:px-4 md:py-10 border-1 border-gray-400 shadow-md rounded-md">
+                        <h2 class="font-bold text-center underline">Descrizione</h2>
                         <p>
                         ${product.description}
                         </p>
                     </section>
-                    <section class="flex flex-col gap-3 p-2 md:py-10">
-                        <h2 class="font-bold">Informazioni</h2>
-                        <ul class="flex flex-col gap-2">
+                    <section class="flex flex-col gap-3 p-2 md:py-10 border-1 border-gray-400 shadow-md rounded-md">
+                        <h2 class="font-bold text-center underline">Informazioni commerciali</h2>
+                        <ul class="flex flex-col gap-2 text-center">
                             <li class="flex flex-col">
-                                <p><strong>Prezzo:</strong> ${product.discount_price ? `<del class="text-red-800">${product.price}</del>` : product.price}</p>
+                                <p><strong>Prezzo:</strong> ${product.discount_price ? `<del class="text-red-800">€${product.price}</del>` : product.price}</p>
                             </li>
                             ${(() => {
                                 if (product.discount_price) {
                                     return `
                                     <li class="flex flex-col">
-                                        <p><strong>Prezzo scontato:</strong> ${product.discount_price}</p>
+                                        <p><strong>Prezzo scontato:</strong> €${product.discount_price}</p>
                                     </li>`;
                                 }
                                 return "";
@@ -704,34 +704,35 @@ async function mainProductSheet(productID) {
                             </li>
                         </ul>
                     </section>
+                    <div class="${USER_INFO.loggedIn ? "flex" : "hidden"} flex-col md:flex-row justify-center items-center flex-1">
+                    ${(() => {
+                        if (USER_INFO.loggedIn && USER_INFO.user.isCustomer) {
+                            return `<form action="CRUDcart"
+                                class="w-full flex flex-col gap-4 justify-center items-center border-4 border-double p-4 rounded-md bg-linear-to-b from-white to-amber-100">
+                                <fieldset class="flex flex-row gap-2 justify-center items-center">
+                                    <legend class="h-0 invisible">Dettagli d'acquisto</legend>
+                                    <label for="purchaseQuantity">Quantitá d'acquisto</label>
+                                    <input type="number" name="purchaseQuantity" id="purchaseQuantity" min="1" max="${product.quantity_available}" value="1" onchange="changePreviewCartPrice(this.value, ${product.discount_price ? product.discount_price : product.price})"
+                                        class="border-1 border-black px-1 w-20 rounded-md bg-white" />
+                                </fieldset>
+                                <p>Prezzo bloccato nel carrello: €${product.discount_price ? product.discount_price : product.price}</p>
+                                <input type="submit" value="Aggiungi al carrello" name="add#${product.id}"
+                                    class="cursor-pointer px-4 py-2 border-2 border-black rounded-full bg-white font-medium active:inset-shadow-sm active:inset-shadow-gray-800" />
+                            </form>`;
+                        } else if (USER_INFO.loggedIn && !USER_INFO.isCustomer) {
+                        return `<a class="flex items-center justify-center gap-2 border-black border-1 w-full py-1 mt-2 rounded-full
+                                    active:inset-shadow-sm active:inset-shadow-gray-800 bg-ulorange md:w-1/3"
+                                        href="updateProduct#${productID}">
+                                        <img class="w-5 h-5 aspect-square" src="assets/icons/edit.png" alt="Modifica prodotto" />
+                                        Modifica prodotto
+                                    </a>`;
+                        }
+                        return "";
+                    })()}
+                    </div>
                 </div>
             </div>
         </div>
-        <footer class="${USER_INFO.loggedIn ? "flex" : "hidden"} flex-col md:flex-row justify-center items-center flex-1">
-        ${(() => {
-            if (USER_INFO.loggedIn && USER_INFO.user.isCustomer) {
-                return `<form action="CRUDcart"
-                    class="md:w-2/3 w-full flex flex-col gap-4 border-1 justify-center items-center border-black p-4 rounded-md mt-6 bg-ulyellow">
-                    <fieldset class="flex flex-row gap-2 justify-center items-center">
-                        <legend class="h-0 invisible">Dettagli d'acquisto</legend>
-                        <label for="purchaseQuantity" class="font-medium">Quantitá d'acquisto</label>
-                        <input type="number" name="purchaseQuantity" id="purchaseQuantity" min="1" max="${product.quantity_available}" value="1"
-                            class="border-1 border-black px-1 w-20 rounded-md bg-white" />
-                    </fieldset>
-                    <input type="submit" value="Aggiungi al carrello" name="add#${product.id}"
-                        class="cursor-pointer px-4 py-2 border-2 border-black rounded-full bg-white font-medium active:inset-shadow-sm active:inset-shadow-gray-800" />
-                </form>`;
-            } else if (USER_INFO.loggedIn && !USER_INFO.isCustomer) {
-               return `<a class="flex items-center justify-center gap-2 border-black border-1 w-full py-1 mt-2 rounded-full
-                        active:inset-shadow-sm active:inset-shadow-gray-800 bg-ulorange md:w-1/3"
-                            href="updateProduct#${productID}">
-                            <img class="w-5 h-5 aspect-square" src="assets/icons/edit.png" alt="Modifica prodotto" />
-                            Modifica prodotto
-                        </a>`;
-            }
-            return "";
-        })()}
-        </footer>
     </article>
     </div>`;
 }
