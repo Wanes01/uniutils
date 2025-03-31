@@ -298,7 +298,7 @@ function italianDateFormat(isoDate, orderID) {
     const date = new Date(isoDate);
     const itFormat = date.toLocaleDateString("it-IT"); // DD/MM/YYYY date format
     const dateDisplayer = document.getElementById(`deliveryDate#${orderID}`).nextElementSibling;
-    dateDisplayer.innerHTML = itFormat;
+    dateDisplayer.innerHTML = "Data di consegna: " + itFormat;
 }
 
 async function updateOrderSubmitter(formData) {

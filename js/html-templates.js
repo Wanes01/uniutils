@@ -7,14 +7,14 @@ function generateProductPreview(productData, wClass, heading) {
     for (let i = 0; i < productData.length; i++) {
         products.push(
         `<article
-            aria-labelledby="article-title${productData[i].id}" class="flex flex-row md:flex-col gap-2 border-1 ${wClass} border-gray-400 shadow-md shadow-gray-500 py-2 px-2 rounded-sm">
+            aria-labelledby="article-title${productData[i].id}${i}" class="flex flex-row md:flex-col gap-2 border-1 ${wClass} border-gray-400 shadow-md shadow-gray-500 py-2 px-2 rounded-sm">
             <header class="flex items-center justify-center basis-1/3">
                 <img class="w-auto md:max-h-40" src="${productData[i].image_name}" alt="${productData[i].title}" />
             </header>
             <div class="flex flex-col w-full grow">
                 <section>
                     <!-- id for aria-label -->
-                    <${heading} id="article-title${productData[i].id}" class="font-bold">${productData[i].title}</${heading}>
+                    <${heading} id="article-title${productData[i].id}${i}" class="font-bold">${productData[i].title}</${heading}>
                     <p class="font-semibold">€${productData[i].discount_price ? productData[i].discount_price : productData[i].price} <del class="text-red-800">${
                         productData[i].discount_price != null ? "€" + productData[i].price : ""
                     }</del>${
@@ -33,7 +33,7 @@ function generateProductPreview(productData, wClass, heading) {
                         <li>
                             <a class="flex items-center justify-center gap-2 border-black border-1 w-full py-1 mt-2 rounded-full active:inset-shadow-sm active:inset-shadow-gray-800"
                                 href="productSheet#${productData[i].id}">
-                                <img class="w-5 h-5 aspect-square" src="assets/icons/info.png" alt="" />
+                                <img class="w-5 h-5 aspect-square" src="assets/icons/info.png" alt="Scheda prodotto" />
                                 Scheda prodotto
                             </a>
                         </li>
@@ -45,7 +45,7 @@ function generateProductPreview(productData, wClass, heading) {
                                     <a class="flex items-center justify-center gap-2 border-black border-1 w-full py-1 mt-2 rounded-full
                                     active:inset-shadow-sm active:inset-shadow-gray-800 bg-ulorange"
                                         href="updateProduct#${productData[i].id}">
-                                        <img class="w-5 h-5 aspect-square" src="assets/icons/edit.png" alt="" />
+                                        <img class="w-5 h-5 aspect-square" src="assets/icons/edit.png" alt="Modifica prodotto" />
                                         Modifica prodotto
                                     </a>
                                 </li>`;
@@ -136,14 +136,16 @@ function generateNavItem(linkTitle, active) {
                     : `md:last:border-udred text-udred md:w-auto
                     md:hover:bg-gradient-to-t md:hover:from-ulyellow md:hover:via-white md:hover:via-80% md:hover:to-white`;
             } else {
+                //w-3 h-3 md:mb-0.5
                 return active == linkTitle.toLowerCase()
                     ? "md:border-b-black md:w-auto md:bg-usky"
                     : `md:hover:border-b-black md:w-auto
                     md:hover:bg-gradient-to-t md:hover:from-usky md:hover:via-white md:hover:via-80% md:hover:to-white`;
             }
         })()}"><a class="flex flex-row gap-1 md:py-1 md:px-2 py-6 w-full justify-center items-center font-bold" href="${linkTitle.toLowerCase()}">
-            <img src="assets/icons/${linkTitle.toLowerCase()}.png" alt="" class="w-3 h-3 md:mb-0.5" />
-            ${linkTitle}</a></li>`
+                <img src="assets/icons/${linkTitle.toLowerCase()}.png" alt="${linkTitle}" class="w-3 h-3 md:mb-0.5" />
+                <p>${linkTitle}</p>
+                </a></li>`;
 }
 
 function mainLogin() {
@@ -254,7 +256,7 @@ async function mainCatalogo(
         <!-- Sidebar con i filtri di ricerca -->
         <aside class="border-gray-400 border-1 md:border-0 rounded-md px-2 py-1 md:w-7/24">
             <!-- can be clicked to expand on mobile viewport -->
-            <div id="toggleFilters" tabindex="0" aria-expanded="false" aria-controls="filtersPanel" class="flex flex-row items-center justify-center gap-3">
+            <div id="toggleFilters" role="button" tabindex="0" aria-expanded="false" aria-controls="filtersPanel" class="flex flex-row items-center justify-center gap-3">
                 <h2 class="font-semibold text-center md:text-lg">Filtri</h2>
                 <img src="assets/icons/down-arrow.png" alt="Apri/chiudi filtri"
                 class="w-4 h-4 md:hidden" />
@@ -356,8 +358,11 @@ async function mainCatalogo(
                 </fieldset>
                 <input type="submit" value="Applica filtri"
                     class="cursor-pointer border-1 border-gray-500 bg-ulred py-1 rounded-full active:inset-shadow-sm active:inset-shadow-gray-800" />
-                <input type="reset" value="Reimposta filtri"
-                    class="cursor-pointer border-1 border-gray-500 py-1 rounded-full active:inset-shadow-sm active:inset-shadow-gray-800" />
+                <div class="w-full flex flex-col">
+                    <label for="resetFilters" class="invisible h-0 w-0">Reimposta filtri</label>
+                    <input id="resetFilters" type="reset" value="Reimposta filtri"
+                        class="cursor-pointer border-1 border-gray-500 py-1 rounded-full active:inset-shadow-sm active:inset-shadow-gray-800" />
+                </div>
             </form>
         </aside>
         <div class="w-full flex flex-col gap-5">
@@ -384,7 +389,7 @@ async function mainCatalogo(
                         <a href="CRUDProduct" class="flex flex-row justify-center items-center gap-2
                         font-semibold bg-ugreen py-2 md:px-3 rounded-full text-center active:inset-shadow-sm active:inset-shadow-gray-800">
                             Aggiungi prodotto
-                            <img src="assets/icons/add.png" class="w-4 h-4" />
+                            <img src="assets/icons/add.png" class="w-4 h-4" alt="Aggiungi prodotto" />
                         </a>
                         `
                     }
@@ -417,7 +422,6 @@ async function mainCatalogo(
                             i < totalPages ? "border-r-1" : "" }">${i}</a>
                         </li>`;
                     }
-                    console.log(numbers);
                     return numbers;
                 })()} 
                 </ul>
@@ -721,7 +725,7 @@ async function mainProductSheet(productID) {
                return `<a class="flex items-center justify-center gap-2 border-black border-1 w-full py-1 mt-2 rounded-full
                         active:inset-shadow-sm active:inset-shadow-gray-800 bg-ulorange md:w-1/3"
                             href="updateProduct#${productID}">
-                            <img class="w-5 h-5 aspect-square" src="assets/icons/edit.png" alt="" />
+                            <img class="w-5 h-5 aspect-square" src="assets/icons/edit.png" alt="Modifica prodotto" />
                             Modifica prodotto
                         </a>`;
             }
@@ -813,14 +817,14 @@ async function mainCarrello() {
                                         <li class="flex flex-row w-full">
                                             <a class="grow flex items-center justify-center gap-2 border-black border-1 w-full py-1 px-2 rounded-full active:inset-shadow-sm active:inset-shadow-gray-800"
                                                 href="productSheet#${product.id}">
-                                                <img class="w-5 h-5 aspect-square" src="assets/icons/info.png" alt="" />
+                                                <img class="w-5 h-5 aspect-square" src="assets/icons/info.png" alt="Scheda prodotto" />
                                                 Scheda prodotto
                                             </a>
                                         <li>
                                         <li class="flex flex-row w-full">
                                             <a class="grow flex items-center justify-center gap-2 border-red-700 text-red-700 border-1 w-full py-1 px-2 rounded-full active:inset-shadow-sm active:inset-shadow-gray-800"
                                                 href="deleteFromCart#${product.id}">
-                                                <img class="w-5 h-5 aspect-square" src="assets/icons/remove.png" alt="" />
+                                                <img class="w-5 h-5 aspect-square" src="assets/icons/remove.png" alt="Rimuovi dal carrello" />
                                                 Rimuovi dal carrello
                                             </a>
                                         <li>
@@ -954,7 +958,7 @@ async function mainOrdini() {
                             <a href="expandDetails" id="toggleOrder${order.id}" aria-expanded="false" aria-controls="orderDetails${order.id}"
                                 class="text-black self-center h-10 flex flex-row justify-center items-center gap-2 px-10 py-2 border-2 border-black bg-white rounded-full w-full md:w-auto">
                                 <p class="text-nowrap">Apri/Chiudi dettagli</p>
-                                <img src="assets/icons/down-arrow.png" alt="" class="w-4 h-4" />
+                                <img src="assets/icons/down-arrow.png" alt="Apri/Chiudi dettagli" class="w-4 h-4" />
                             </a>
                         </div>
                     </header>
@@ -1017,7 +1021,7 @@ async function mainOrdini() {
                                                 <a class="grow flex items-center justify-center gap-2 border-black border-1 w-full py-1 px-2 rounded-full active:inset-shadow-sm active:inset-shadow-gray-800"
                                                     href="productSheet#${product.id}">
                                                     <img class="w-5 h-5 aspect-square" src="assets/icons/info.png"
-                                                        alt="" />
+                                                        alt="Scheda prodotto" />
                                                     Scheda prodotto
                                                 </a>
                                             </li>
@@ -1055,20 +1059,23 @@ async function mainOrdini() {
                                                     <label for="annullato#${order.id}">Annullato</label>
                                                 </li>
                                                 <li class="flex flex-row gap-2 items-center">
-                                                    <label for="deliveryDate#${order.id}">Data di consegna</label>
                                                     <input type="date" name="deliveryDate#${order.id}" id="deliveryDate#${order.id}" onchange="italianDateFormat(this.value, ${order.id})" min="${(() => {
                                                         let today = new Date();
                                                         today = new Date(today.setDate(today.getDate() + 1)).toISOString().split('T')[0];
                                                         return today;
                                                         })()}" value="${order.delivery_date ? order.delivery_date.split(" ")[0] : ""}"
-                                                         class="border-1 border-black p-1 rounded-sm focus:outline-2 focus:outline-sky-700 focus:bg-sky-50 w-8" />
-                                                    <label for="deliveryDate#${order.id}">${order.delivery_date ? formatMySQLTimestamp(order.delivery_date) : ""}</label>
+                                                        class="border-1 border-black p-1 rounded-sm focus:outline-2 focus:outline-sky-700 focus:bg-sky-50 w-8" />
+                                                    <label for="deliveryDate#${order.id}">Data di consegna: ${order.delivery_date ? formatMySQLTimestamp(order.delivery_date) : "Non impostata."}</label>
+                                                    <!-- <label for="deliveryDate#${order.id}">${order.delivery_date ? formatMySQLTimestamp(order.delivery_date) : ""}</label> -->
                                                 </li>
                                             </ul>
                                         </fieldset>
                                         <div class="flex flex-col md:flex-row gap-3">
                                             <input type="submit" value="Cambia stato e data di consegna" name="${order.id}" class="p-2 border-1 border-black bg-ugreen rounded-full grow active:inset-shadow-sm active:inset-shadow-gray-800 cursor-pointer text-center" />
-                                            <input type="reset" value="Reimposta stato e data di consegna" class="p-2 border-1 border-black bg-ulred rounded-full grow active:inset-shadow-sm active:inset-shadow-gray-800 cursor-pointer text-center" />
+                                            <div class="flex flex-col grow">
+                                                <label for="resetOrderState${order.id}" class="invisible h-0 w-0">Reimposta stato e data di consegna</label>
+                                                <input id="resetOrderState${order.id}" type="reset" value="Reimposta stato e data di consegna" class="p-2 border-1 border-black bg-ulred rounded-full active:inset-shadow-sm active:inset-shadow-gray-800 cursor-pointer text-center" />
+                                            </div>
                                         </div>
                                     </form>
                                 </footer>`
@@ -1179,8 +1186,9 @@ async function mainContatti() {
                             <li class="${USER_INFO.loggedIn && !USER_INFO.user.isCustomer ? "flex" : "hidden"} flex-col gap-1">
                                 <label for="user" class="font-semibold">Utente da contattare</label>
                                 <select name="user" id="user" ${USER_INFO.loggedIn && !USER_INFO.user.isCustomer ? "required" : ""} 
-                                    class="bg-white border-1 border-orange-900 px-1 py-2 rounded-sm focus:outline-2 focus:outline-orange-900">
-                                    <option value="all">Tutti i clienti</option>
+                                    class="text-center bg-white border-1 border-orange-900 px-1 py-2 rounded-sm focus:outline-2 focus:outline-orange-900">
+                                    <option value="" disabled> ---- Seleziona il destinatario della notifica ---- </option>
+                                    <option value="all" selected>Tutti i clienti</option>
                                     ${await (async () => {
                                         // loads customers data only if its the vendor (its also checked server side)
                                         if (USER_INFO.loggedIn && !USER_INFO.user.isCustomer) {
