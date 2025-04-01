@@ -535,5 +535,14 @@ class DatabaseHelper {
         $result = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         return $result[0];
     }
+
+    public function countNotifications($userID) {
+        $query = "SELECT COUNT(*) AS count FROM notifications WHERE user_id = ? AND is_read = 0";
+        $stmt = $this->db->prepare($query);
+        $stmt->bind_param("i", $userID);
+        $stmt->execute();
+        $result = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+        return $result[0];
+    }
 }
 ?>

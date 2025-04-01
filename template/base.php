@@ -19,7 +19,7 @@
             <img tabindex="0" id="menuToggle" aria-expanded="false" aria-controls="menuPanel" src="assets/icons/menu.png" alt="Apri/chiudi menú di navigazione" class="w-6 h-6 cursor-pointer" />
         </div>
         <!-- navigazione a scomparsa -->
-        <nav id="menuPanel" aria-hidden="true" class="hidden animate-open md:animate-none bg-white w-full md:flex md:flex-1">
+        <nav id="menuPanel" aria-hidden="true" class="hidden md:flex md:flex-1 animate-open md:animate-none bg-white w-full">
             <ul class="md:flex md:flex-row w-full md:flex-1 md:items-center md:justify-end md:gap-3 md:mr-3 z-50">
                 
             </ul>

@@ -46,10 +46,11 @@ async function fillMain(mainFunction) {
 async function fillNavigation(active) {
     const linkList = document.querySelector("body > header > nav:last-of-type > ul");
     const links = USER_INFO.navigation;
-    linkList.innerHTML = "";
+    let navHTML = "";
     links.forEach(link => {
-        linkList.innerHTML += generateNavItem(link, active);
+        navHTML += generateNavItem(link, active);
     });
+    linkList.innerHTML = navHTML;
 }
 
 /* Manages the user registration.
@@ -105,6 +106,9 @@ async function loginSubmitter(formData, errorList) {
     await fillMain(mainVetrina);
     // the navigation menú changes on login or logout
     await fillNavigation("vetrina");
+
+    // the user is now logged in. Attach the notification number timeout
+    await changeNotificationNumber();
 }
 
 /* Logs the user out. Tells the server to close the session
@@ -113,6 +117,7 @@ async function logoutUser() {
     const response = await apiCaller("logout.php");
     if (response.success) {
         USER_INFO = await getUserInfo();
+        clearTimeout(notificationTimeoutID);
         await showDisappearingInfoModal("Bye bye! 👋", 2500);
         await fillMain(mainVetrina);
         await fillNavigation("vetrina");
@@ -396,4 +401,20 @@ function swapElementClasses(element, firstClass, secondClass) {
 function changePreviewCartPrice(quantity, price) {
     const preview = document.querySelector("div form p");
     preview.innerHTML = `Prezzo bloccato nel carrello: €${(quantity * price).toFixed(2)}`;
+}
+
+let notificationTimeoutID = null;
+async function changeNotificationNumber() {
+    if (notificationTimeoutID) {
+        clearTimeout(notificationTimeoutID);
+    }
+    const numberSpan = document.querySelector("nav ul li a[href='notifiche'] p span");
+    const notificationCount = (await apiCaller("count-notifications.php")).count;
+    if (notificationCount > 0) {
+        numberSpan.classList.remove("hidden");
+    } else {
+        numberSpan.classList.add("hidden");
+    }
+    numberSpan.innerHTML = notificationCount > 0 ? notificationCount : "";
+    notificationTimeoutID = setTimeout(changeNotificationNumber, NOTIFICATION_REFRESH_DELAY);
 }

@@ -7,6 +7,7 @@ GLOBAL VARIABLES AND DECLARATIONS
 /* User information.
 Changes during login and logout */
 let USER_INFO = null;
+const NOTIFICATION_REFRESH_DELAY = 5 * 1000;
 
 /* Associates the href value to the function used to fill the main */
 const HREF_TO_MAINFUNCTION = {
@@ -70,18 +71,22 @@ popupMenu.addEventListener('click', () => {
     popupMenu.setAttribute("aria-hidden", true);
 });
 
-/* 
+/*
 LINK HANDLERS 
 */
 
 
-/* translates all the Enter key press as a click on the current active element.
-The behavior associated with the click is described in the body click handler
-*/
+
+/* Translates all the Enter keydown into mouse clicks, handled below by the body click handler.
+The default behavior is overwritten, unless it's a form */
 document.body.addEventListener('keydown', async function(e) {
-    if (e.key === "Enter") {
+    if (e.key !== "Enter") {
+        return;
+    }
+
+    const activeElement = document.activeElement;
+    if ((activeElement.closest("div") || activeElement.closest("img")) && !activeElement.closest("form")) {
         e.preventDefault();
-        const activeElement = document.activeElement;
         activeElement.click();
     }
 });
@@ -260,4 +265,8 @@ document.body.addEventListener('click', async function(e) {
     USER_INFO = await getUserInfo();
     await fillMain(mainVetrina);
     await fillNavigation("vetrina");
+
+    if (USER_INFO.loggedIn) {
+        await changeNotificationNumber();
+    }
 })();

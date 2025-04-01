@@ -144,7 +144,15 @@ function generateNavItem(linkTitle, active) {
             }
         })()}"><a class="flex flex-row gap-1 md:py-1 md:px-2 py-6 w-full justify-center items-center font-bold" href="${linkTitle.toLowerCase()}">
                 <img src="assets/icons/${linkTitle.toLowerCase()}.png" alt="${linkTitle}" class="w-3 h-3 md:mb-0.5" />
-                <p>${linkTitle}</p>
+                <p>${linkTitle} ${(() => {
+                    if (linkTitle === "Notifiche") {
+                        const numberSpan = document.querySelector("nav ul li a[href='notifiche'] p span");
+                        return numberSpan
+                            ? numberSpan.outerHTML
+                            : `<span class="hidden text-sm py-0.5 px-2 aspect-square rounded-full bg-radial from-uyellow from-10% to-ured shadow shadow-white font-bold"></span>`;
+                    }
+                    return "";
+                })()}</p>
                 </a></li>`;
 }
 
@@ -721,7 +729,7 @@ async function mainProductSheet(productID) {
                             </form>`;
                         } else if (USER_INFO.loggedIn && !USER_INFO.isCustomer) {
                         return `<a class="flex items-center justify-center gap-2 border-black border-1 w-full py-1 mt-2 rounded-full
-                                    active:inset-shadow-sm active:inset-shadow-gray-800 bg-ulorange md:w-1/3"
+                                    active:inset-shadow-sm active:inset-shadow-gray-800 bg-ulorange"
                                         href="updateProduct#${productID}">
                                         <img class="w-5 h-5 aspect-square" src="assets/icons/edit.png" alt="Modifica prodotto" />
                                         Modifica prodotto
